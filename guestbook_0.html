@@ -1,0 +1,124 @@
+<!--
+     Excerpted from "Web Development with Clojure, Third Edition",
+     published by The Pragmatic Bookshelf.
+     Copyrights apply to this code. It may not be used to create training material,
+     courses, books, articles, and the like. Contact us if you are in doubt.
+     We make no guarantees that this code is fit for any purpose.
+     Visit http://www.pragmaticprogrammer.com/titles/dswdcloj3 for more book information.
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+    <link rel="stylesheet" href="examples/public/parinfer-codemirror/codemirror.css">
+    <link rel="stylesheet" href="examples/public/parinfer-codemirror/theme.css">
+    <link rel="stylesheet" href="examples/public/parinfer-codemirror/demo.css">
+    <script src="examples/public/parinfer-codemirror/codemirror.js"></script>
+    <script src="examples/public/parinfer-codemirror/matchbrackets.js"></script>
+    <script src="examples/public/parinfer-codemirror/clojure.js"></script>
+    <script src="examples/public/parinfer-codemirror/parinfer.js"></script>
+    <script src="examples/public/parinfer-codemirror/parinfer-codemirror.js"></script>
+    <script src="js/bb_web/bb_web.js"></script>
+    <title>Guestbook 0</title>
+</head>
+
+<body>
+
+<div id="cljs-code" style="display: none;">
+(require '[bb-web :refer [state]]
+         '[goog.object :as go]
+         '[reagent.core :as r])
+
+;
+(defn message-list [messages]
+  (println messages)
+  [:ul.messages
+    (for [{:keys [timestamp message name]} @messages]
+     ^{:key timestamp}
+     [:li
+      [:time timestamp]
+      [:p message]
+      [:p " - " name]])])
+;
+
+;
+(defn send-message! [fields messages]
+  (do
+    (swap! messages conj (assoc @fields :timestamp (bb-web/timestamp)))
+    (reset! fields nil)))
+;
+
+;
+(defn message-form [messages]
+  (let [fields (r/cursor state [:fields])]
+    (fn [messages]
+      [:div
+       [:div.field
+        [:label.label {:for :name} "Name"]
+        [:input.input
+         {:type :text
+          :name :name
+          :on-change (fn [e] (swap! fields assoc :name
+                                    (-> e (go/get "target") (go/get "value"))))
+          :value (:name @fields)}]]
+       [:div.field
+        [:label.label {:for :message} "Message"]
+        [:textarea.textarea
+         {:name :message
+          :value (:message @fields)
+          :on-change (fn [e] (swap! fields assoc :message
+                                    (-> e (go/get "target") (go/get "value"))))}]]
+       [:input.button.is-primary
+        {:type :submit
+         :on-click (fn [_] (send-message! fields messages))
+         :value "comment"}]])))
+
+(defn home []
+  (let [messages (r/cursor state [:messages])]
+    (fn []
+      [:div.content>div.columns.is-centered>div.column.is-two-thirds
+       [:div.columns>div.column
+        [:h3 "Messages"]
+        [message-list messages]]
+       [:div.columns>div.column
+        [message-form messages]]])))
+;
+[home]
+</div>
+
+
+<div id="cljs-app-fullscreen">
+<div id="cljs-app"></div>
+<hr>
+<a class="button is-link is-light"
+   href="https://github.com/kloimhardt/bb-web#bb-web">
+    Go to GitHub repository
+</a>
+<button class="button is-danger"
+        onclick='bb_web.app.run("cljs-app", cm.getValue())'>
+    Run ClojureScript code
+</button>
+
+<button class="button is-danger is-light"
+        onclick='bb_web.app.run("cljs-app-fullscreen", document.getElementById("cljs-code").textContent)'>
+    Run original code full screen
+</button>
+
+<div id="editor"></div>
+<script>
+ var cm = null;
+ (function(){
+     cm = CodeMirror(document.getElementById("editor"), {
+         matchBrackets: true,
+         lineNumbers: true,
+     });
+     cm.setValue(document.getElementById("cljs-code").textContent);
+     parinferCodeMirror.init(cm, 'paren');
+ })();
+</script>
+</div>
+</body>
+</html>
