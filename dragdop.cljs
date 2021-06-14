@@ -24,10 +24,15 @@
 (defn end-drag [_e]
   (vswap! l-state assoc :current-id nil))
 
+(defn get-mouse-positon [e]
+  (.log js/console "hi" (.-touches e))
+  [(.-clientX e) (.-clientY e)])
+
 (defn drag [e]
   (when-let [id  (:current-id @l-state)]
-    (let [[ox oy] (:offset @l-state)]
-      (set-pos id (+ (.-clientX e) ox) (+ (.-clientY e) oy)))))
+    (let [[ox oy] (:offset @l-state)
+          [mx my] (get-mouse-positon e)]
+      (set-pos id (+ mx ox) (+ my oy)))))
 
 (defn dragarea [e]
   (when e
@@ -61,6 +66,6 @@
     [word {:id "w1" :x 18 :y 15} "ha"]
     [word {:id "w2" :x 35 :y 15} "hu"]
     [word {:id "w3" :x 35 :y 55} "lorem ipsum hicksi"]]
-   [:p "hiij" (str @r-state)]])
+   [:p "hiijnio" (str @r-state)]])
 
 (dom/render [home] (.getElementById js/document "content"))
