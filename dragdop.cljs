@@ -25,8 +25,8 @@
   (vswap! l-state assoc :current-id nil))
 
 (defn get-mouse-positon [e]
-  (.log js/console "hi" (.-touches e))
-  (let [evt (if-let [t (.-touches e)] (first t) e)]
+  (.log js/console "hi3" (.-touches e))
+  (let [evt (if-let [t (.-touches e)] (get t 0) e)]
     [(.-clientX evt) (.-clientY evt)]))
 
 (defn drag [e]
