@@ -16,7 +16,7 @@
   (get-in @r-state [:words id :pos]))
 
 (defn get-mouse-positon [e]
-  (.log js/console "hi7")
+  (.log js/console "hi8")
   (let [evt (if-let [t (.-touches e)] (first t) e)]
     [(.-clientX evt) (.-clientY evt)]))
 
