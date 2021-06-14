@@ -16,9 +16,8 @@
   (get-in @r-state [:words id :pos]))
 
 (defn get-mouse-positon [e]
-  (.log js/console "hi6" (.-touches e) (first (.-touches e)) (get (.-touches e) 0))
+  (.log js/console "hi7")
   (let [evt (if-let [t (.-touches e)] (first t) e)]
-    (.log js/console "ev" (.-clientX evt))
     [(.-clientX evt) (.-clientY evt)]))
 
 (defn start-drag [id]
