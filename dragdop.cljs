@@ -15,20 +15,21 @@
 (defn get-pos [id]
   (get-in @r-state [:words id :pos]))
 
-(defn start-drag [id]
-  (fn [e]
-    (vswap! l-state assoc :current-id id)
-    (let [[x y] (get-pos id)]
-      (vswap! l-state assoc :offset [(- x (.-clientX e)) (- y (.-clientY e))]))))
-
-(defn end-drag [_e]
-  (vswap! l-state assoc :current-id nil))
-
 (defn get-mouse-positon [e]
-  (.log js/console "hi5" (.-touches e) (first (.-touches e)) (get (.-touches e) 0))
+  (.log js/console "hi6" (.-touches e) (first (.-touches e)) (get (.-touches e) 0))
   (let [evt (if-let [t (.-touches e)] (first t) e)]
     (.log js/console "ev" (.-clientX evt))
     [(.-clientX evt) (.-clientY evt)]))
+
+(defn start-drag [id]
+  (fn [e]
+    (vswap! l-state assoc :current-id id)
+    (let [[x y] (get-pos id)
+          [mx my] (get-mouse-positon e)]
+      (vswap! l-state assoc :offset [(- x mx) (- y my)]))))
+
+(defn end-drag [_e]
+  (vswap! l-state assoc :current-id nil))
 
 (defn drag [e]
   (when-let [id  (:current-id @l-state)]
