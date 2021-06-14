@@ -29,20 +29,24 @@
     (let [[ox oy] (:offset @l-state)]
       (set-pos id (+ (.-clientX e) ox) (+ (.-clientY e) oy)))))
 
+(defn dragarea [e]
+  (when e
+    (doto e
+      (.addEventListener "mousemove" drag)
+      (.addEventListener "touchmove" drag)
+      (.addEventListener "mouseup" end-drag)
+      (.addEventListener "touchend" end-drag)
+      #_(.addEventListener "touchleave" end-drag)
+      #_(.addEventListener "touchcancel" end-drag)
+      #_(.addEventListener "mouseleave" end-drag))))
+
 (defn make-draggable [id]
   (fn [e]
     (when e
       (doto e
         (.addEventListener "mousedown" (start-drag id))
-        (.addEventListener "mousemove" drag)
-        (.addEventListener "mouseup" end-drag)))))
-
-(defn dragarea [e]
-  (when e
-    (doto e
-      (.addEventListener "mousemove" drag)
-      (.addEventListener "mouseup" end-drag)
-      #_(.addEventListener "mouseleave" end-drag))))
+        (.addEventListener "touchstart" (start-drag id))
+        dragarea))))
 
 (defn word [{:keys [id x y]} _text]
   (set-pos id x y)
@@ -57,6 +61,6 @@
     [word {:id "w1" :x 18 :y 15} "ha"]
     [word {:id "w2" :x 35 :y 15} "hu"]
     [word {:id "w3" :x 35 :y 55} "lorem ipsum hicksi"]]
-   [:p "hi" (str @r-state)]])
+   [:p "hiij" (str @r-state)]])
 
 (dom/render [home] (.getElementById js/document "content"))
