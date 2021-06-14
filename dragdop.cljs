@@ -26,7 +26,8 @@
 
 (defn get-mouse-positon [e]
   (.log js/console "hi" (.-touches e))
-  [(.-clientX e) (.-clientY e)])
+  (let [evt (if-let [t (.-touches e)] (first t) e)]
+    [(.-clientX evt) (.-clientY evt)]))
 
 (defn drag [e]
   (when-let [id  (:current-id @l-state)]
