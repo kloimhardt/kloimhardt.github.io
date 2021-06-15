@@ -19,7 +19,7 @@
   (get-in @r-state [:words id :pos]))
 
 (defn get-mouse-positon [e]
-  (.log js/console "hi9")
+  (.log js/console "hi10")
   (let [evt (if-let [t (.-touches e)] (first t) e)]
     [(.-clientX evt) (.-clientY evt)]))
 
@@ -35,7 +35,7 @@
 
 (defn drag [e]
   (when-let [id (:current-id @l-state)]
-    (.deselectAll (:svg-element @l-state))
+    ;;(.deselectAll (:svg-element @l-state))
     (let [[ox oy] (:offset @l-state)
           [mx my] (get-mouse-positon e)]
       (set-pos id (+ mx ox) (+ my oy)))))
@@ -63,7 +63,7 @@
   (set-pos id x y)
   (fn [{:keys [id _x _y]} text]
     (let [[px py] (get-pos id)]
-      [:text {:x px :y py :ref (make-draggable id) :style {:cursor :move :user-select :none}} text])))
+      [:text {:x px :y py :ref (make-draggable id) :style {:cursor :move}} text])))
 
 (defn home []
   [:div
