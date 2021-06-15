@@ -12,11 +12,14 @@
 (defn set-pos [id x y]
   (swap! r-state assoc-in [:words id :pos] [x y]))
 
+(defn set-element [id e]
+  (vswap! l-state assoc-in [:words id :element] e))
+
 (defn get-pos [id]
   (get-in @r-state [:words id :pos]))
 
 (defn get-mouse-positon [e]
-  (.log js/console "hi8")
+  (.log js/console "hi9")
   (let [evt (if-let [t (.-touches e)] (first t) e)]
     [(.-clientX evt) (.-clientY evt)]))
 
@@ -31,7 +34,8 @@
   (vswap! l-state assoc :current-id nil))
 
 (defn drag [e]
-  (when-let [id  (:current-id @l-state)]
+  (when-let [id (:current-id @l-state)]
+    (.deselectAll (:svg-element @l-state))
     (let [[ox oy] (:offset @l-state)
           [mx my] (get-mouse-positon e)]
       (set-pos id (+ mx ox) (+ my oy)))))
@@ -63,7 +67,7 @@
 
 (defn home []
   [:div
-   [:svg {:xmlns "http://www.w3.org/2000/svg", :viewbox "0 0 30 20"}
+   [:svg {:xmlns "http://www.w3.org/2000/svg", :viewbox "0 0 30 20" :ref (fn [e] (when e (vswap! l-state assoc :svg-element e)))}
     [:rect {:x "0", :y "0", :z 0 :width "300", :height "200", :fill "#fafafa" :ref dragarea}]
     [word {:id "w1" :x 18 :y 15} "ha"]
     [word {:id "w2" :x 35 :y 15} "hu"]
