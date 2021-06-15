@@ -7,19 +7,24 @@
             [clojure.string :as string]))
 
 (def r-state (r/atom {:words {}}))
-(def l-state (volatile! {}))
+(def l-state (volatile! {:fill "#fafafa"}))
 
 (defn set-pos [id x y]
   (swap! r-state assoc-in [:words id :pos] [x y]))
 
 (defn set-element [id e]
-  (vswap! l-state assoc-in [:words id :element] e))
+  (swap! r-state assoc-in [:words id :element] e))
+
+(defn get-element [id]
+  (get-in @r-state [:words id :element]))
 
 (defn get-pos [id]
   (get-in @r-state [:words id :pos]))
 
+(defn get-fill []
+  (:fill @l-state))
+
 (defn get-mouse-positon [e]
-  (.log js/console "hi10")
   (let [evt (if-let [t (.-touches e)] (first t) e)]
     [(.-clientX evt) (.-clientY evt)]))
 
@@ -35,7 +40,6 @@
 
 (defn drag [e]
   (when-let [id (:current-id @l-state)]
-    ;;(.deselectAll (:svg-element @l-state))
     (let [[ox oy] (:offset @l-state)
           [mx my] (get-mouse-positon e)]
       (set-pos id (+ mx ox) (+ my oy)))))
@@ -54,6 +58,7 @@
 (defn make-draggable [id]
   (fn [e]
     (when e
+      (set-element id e)
       (doto e
         (.addEventListener "mousedown" (start-drag id))
         (.addEventListener "touchstart" (start-drag id))
@@ -62,16 +67,25 @@
 (defn word [{:keys [id x y]} _text]
   (set-pos id x y)
   (fn [{:keys [id _x _y]} text]
-    (let [[px py] (get-pos id)]
-      [:text {:x px :y py :ref (make-draggable id) :style {:cursor :move}} text])))
+    (let [[px py] (get-pos id)
+          el (get-element id)
+          [idx1 idx2] [6 10]
+          [start end] (when el [(.getStartPositionOfChar el idx1) (.getEndPositionOfChar el idx2)])
+          client-rect (when el (first (.getClientRects el)))
+          [sx sy ex ey fsy fey] (when el [(.-x start) (.-y start) (.-x end) (.-y end) (.-top client-rect) (.-bottom client-rect)])]
+      [:g
+       [:text {:x px :y py :ref (make-draggable id) :style {:cursor :move} :font-size "2em"} (str text " " sy " " ey)]
+       (when el
+         [:rect {:x sx :y fsy :width (- ex sx) :height (- fey fsy) :fill (get-fill)}])])))
 
 (defn home []
   [:div
-   [:svg {:xmlns "http://www.w3.org/2000/svg", :viewbox "0 0 30 20" :ref (fn [e] (when e (vswap! l-state assoc :svg-element e)))}
-    [:rect {:x "0", :y "0", :z 0 :width "300", :height "200", :fill "#fafafa" :ref dragarea}]
-    [word {:id "w1" :x 18 :y 15} "ha"]
-    [word {:id "w2" :x 35 :y 15} "hu"]
-    [word {:id "w3" :x 35 :y 55} "lorem ipsum hicksi"]]
-   [:p "hiijnio" (str @r-state)]])
+   [:svg {:width "100%" :height "70%"}
+    [:rect {:x 0, :y 0, :width "100%", :height "100%", :fill (get-fill) :ref dragarea}]
+    #_[word {:id "w1" :x 18 :y 30} "hal"]
+    #_[word {:id "w2" :x 155 :y 30} "hui"]
+    [word {:id "w3" :x 35 :y 75} "lorem ipsum hicksi"]]
+   [:p (subs "lorem ipsum duda" 6 11) (str @r-state)]])
 
+(.log js/console "hi11")
 (dom/render [home] (.getElementById js/document "content"))
