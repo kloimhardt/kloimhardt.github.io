@@ -41,8 +41,12 @@
   (.log js/console "rst5")
   (.log js/console @st/r-state)
   (.log js/console "rst1")
-  (.log js/console (get @st/r-state [:poems-struct :tags 1]))
-  (println (filter (fn [[line-id {:keys [tag-id]}]] (= line-id tag-id) ) (st/get-lines)))
+  (let [poems-struct (st/get-poems-struct)
+        pms (rp/poems-from-struct poems-struct)
+        p (first pms)]
+    (println (d/plot-poem (first (:poems poems-struct)) (:lines poems-struct) (:tags poems-struct) 20))
+    )
+
   )
 
 (rp/get-file "poems.txt")

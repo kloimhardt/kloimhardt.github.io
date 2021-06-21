@@ -11,13 +11,13 @@
 
 (defn start-drag [id]
   (fn [e]
-    (vswap! st/l-state assoc :current-id id)
+    (st/set-current-tag-id id)
     (let [[x y] (st/get-tag-pos id)
           [mx my] (get-mouse-positon e)]
-      (vswap! st/l-state assoc :offset [(- x mx) (- y my)]))))
+      (st/set-current-tag-offset (- x mx) (- y my)))))
 
 (defn end-drag [_e]
-  (vswap! st/l-state assoc :current-id nil))
+  (st/set-current-tag-id nil))
 
 (defn get-line-id-when-pos-in-fig [x y]
   (->> (st/get-tag-fig-rects)
@@ -33,8 +33,8 @@
       (println "good")))
 
 (defn drag [e]
-  (when-let [tag-id (:current-id @st/l-state)]
-    (let [[ox oy] (:offset @st/l-state)
+  (when-let [tag-id (st/get-current-tag-id)]
+    (let [[ox oy] (st/get-current-tag-offset)
           [mx my] (get-mouse-positon e)
           [posx posy] [(+ mx ox) (+ my oy)]]
       (st/set-tag-pos tag-id posx posy)
@@ -59,7 +59,6 @@
 (defn make-draggable [id]
   (fn [e]
     (when e
-      (st/set-tag-element id e)
       (doto e
         (.addEventListener "mousedown" (start-drag id))
         (.addEventListener "touchstart" (start-drag id))
@@ -81,22 +80,22 @@
                                          (.-bottom client-rect)])
                     [x-start x-end top bottom] blank-rect]
                 (st/set-tag-fig-rect id blank-rect)
-                (when (= tag (:blank-chars @st/l-state))
+                (when (= tag (st/get-blank-chars))
                   ^{:key id}
                   [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
                           :height (inc (- bottom top))
                           :fill (st/get-fill)}])))))
         ids lines tags)])
 
-(defn plot-poem [{:keys [lines ids]} size]
+(defn plot-poem [poem lines tags size]
   (let [psize (* size 1.5)]
     [:<>
-     (map (fn [idx txt id]
-            ^{:key id}
+     (map (fn [idx line-id]
+            ^{:key line-id}
             [:text {:x 10 :y (* psize (inc idx))
-                    :font-size size :ref #(st/set-line-element id %)}
-             txt])
-          (range) lines ids)]))
+                    :font-size size :ref #(st/set-line-element line-id %)}
+             (rp/concat-line (get lines line-id) tags)])
+          (range) (:line-ids poem))]))
 
 (defn plot-tag [{:keys [id x y]} _text]
   (st/set-tag-pos id x y)
@@ -117,16 +116,15 @@
 
 (defn svg-canvas []
   (let [poems-struct (st/get-poems-struct)
+        first-poem (first (:poems poems-struct))
         pms (rp/poems-from-struct poems-struct)
         p (first pms)]
     [:svg {:width "100%" :height "70%"}
      [:rect {:x 0, :y 0, :width "100%", :height "100%"
              :fill (st/get-fill) :ref dragarea}]
-     [plot-poem p 20]
+     [plot-poem first-poem (:lines poems-struct) (:tags poems-struct) 20]
      [plot-figs p]
-     [plot-tags
-      (get (first (get poems-struct :poems)) :line-ids)
-      50]]))
+     [plot-tags (get first-poem :line-ids) 50]]))
 
 (defn main []
   [svg-canvas])

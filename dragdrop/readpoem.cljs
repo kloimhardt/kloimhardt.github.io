@@ -46,7 +46,7 @@
 
 (defn prepare-poems [plain-text]
   (st/set-poem-struct (poems-struct (read-poems plain-text)))
-  (st/set-tag :blank (:blank-chars @st/l-state))
+  (st/set-tag :blank (st/get-blank-chars))
   (st/set-all-line-tag-ids :blank))
 
 (defn get-file [filename]
