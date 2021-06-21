@@ -46,10 +46,10 @@
 
 (defn prepare-poems [plain-text]
   (st/set-poem-struct (poems-struct (read-poems plain-text)))
-  (st/set-tag :blank "__")
+  (st/set-tag :blank (:blank-chars @st/l-state))
   (st/set-all-line-tag-ids :blank))
 
-(defn get-file [state kw filename] ;;TODO clean
+(defn get-file [filename]
   (GET filename
     {:format :text
      :headers {"Accept" "application/text"}

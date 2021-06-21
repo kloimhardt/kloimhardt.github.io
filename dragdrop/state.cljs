@@ -55,7 +55,7 @@
 (defn get-line-element [id]
   (get-in @r-state [:lines id]))
 
-(def l-state (volatile! {:fill "#fafafa"}))
+(def l-state (volatile! {:fill "#fafafa" :blank-chars "__"}))
 
 (defn get-fill []
   (:fill @l-state))
@@ -67,5 +67,4 @@
   (get-in @l-state [:blanks id]))
 
 (defn get-blank-rects []
-  (get @l-state :blanks)
-  #_(select-keys (get @l-state :blanks) (get-lines-for-tag-id :blank)))
+  (get @l-state :blanks))

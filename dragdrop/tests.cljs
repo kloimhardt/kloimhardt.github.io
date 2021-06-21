@@ -11,8 +11,6 @@
     (.log js/console
           (str a))
     (.log js/console
-          (str (d/blank-out-poem a "__")))
-    (.log js/console
           (str (d/plot-poem a 20)))
     (.log js/console
           (str (d/plot-tags a 20)))
@@ -47,7 +45,7 @@
   (println (filter (fn [[line-id {:keys [tag-id]}]] (= line-id tag-id) ) (st/get-lines)))
   )
 
-(rp/get-file st/r-state :poems-struct "poems.txt")
+(rp/get-file "poems.txt")
 
 (dom/render [d/main] (.getElementById js/document "content"))
 
