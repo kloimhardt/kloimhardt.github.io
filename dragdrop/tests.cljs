@@ -44,7 +44,7 @@
   (.log js/console @st/r-state)
   (.log js/console "rst1")
   (.log js/console (get @st/r-state [:poems-struct :tags 1]))
-  (println (map first (filter (fn [[_ line]] (= (:tag-id line) :blank)) (get-in @st/r-state [:poems-struct :lines]))))
+  (println (filter (fn [[line-id {:keys [tag-id]}]] (= line-id tag-id) ) (st/get-lines)))
   )
 
 (rp/get-file st/r-state :poems-struct "poems.txt")

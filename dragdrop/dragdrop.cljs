@@ -25,6 +25,13 @@
               (when (and (< x-start x x-end) (< top y bottom)) id)))
        (some identity)))
 
+(defn poem-correct? []
+  (when (every? true?
+                (map (fn [[line-id {:keys [tag-id]}]]
+                       (or (nil? tag-id) (= line-id tag-id)))
+                     (st/get-lines)))
+      (println "good")))
+
 (defn drag [e]
   (when-let [tag-id (:current-id @st/l-state)]
     (let [[ox oy] (:offset @st/l-state)
@@ -32,7 +39,9 @@
       (st/set-tag-pos tag-id (+ mx ox) (+ my oy))
       (if-let [line-id (get-line-id-when-mouse-in-fig mx my)]
         (when (= (st/get-line-tag-id line-id) :blank)
-          (st/set-line-tag-id line-id tag-id))
+          (st/set-line-tag-id line-id tag-id)
+          (poem-correct?)
+          )
         (when-let [line-id (first (st/get-lines-for-tag-id tag-id))]
           (st/set-line-tag-id line-id :blank))))))
 
@@ -86,24 +95,24 @@
 (defn plot-figs [{:keys [lines tags ids]}]
   [:<>
    (map (fn [id line tag]
-           (when tag
-             (when-let [el (st/get-line-element id)]
-               (let [idx1 (string/index-of line tag)
-                     idx2 (dec (+ idx1 (count tag)))
-                     [start end] (when el [(.getStartPositionOfChar el idx1)
-                                           (.getEndPositionOfChar el idx2)])
-                     client-rect (when el (first (.getClientRects el)))
-                     blank-rect (when el [(.-x start)
-                                          (.-x end)
-                                          (.-top client-rect)
-                                          (.-bottom client-rect)])
-                     [x-start x-end top bottom] blank-rect]
-                 (st/set-blank-rect id blank-rect)
-                 ^{:key id}
-                 [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
-                         :height (inc (- bottom top))
-                         :fill (st/get-fill)}]))))
-         ids lines tags)])
+          (when tag
+            (when-let [el (st/get-line-element id)]
+              (let [idx1 (string/index-of line tag)
+                    idx2 (dec (+ idx1 (count tag)))
+                    [start end] (when el [(.getStartPositionOfChar el idx1)
+                                          (.getEndPositionOfChar el idx2)])
+                    client-rect (when el (first (.getClientRects el)))
+                    blank-rect (when el [(.-x start)
+                                         (.-x end)
+                                         (.-top client-rect)
+                                         (.-bottom client-rect)])
+                    [x-start x-end top bottom] blank-rect]
+                (st/set-blank-rect id blank-rect)
+                ^{:key id}
+                [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
+                        :height (inc (- bottom top))
+                        :fill (st/get-fill)}]))))
+        ids lines tags)])
 
 (defn plot-poem [{:keys [lines ids]} size]
   (let [psize (* size 1.5)]
@@ -111,7 +120,7 @@
      (map (fn [idx txt id]
             ^{:key id}
             [:text {:x 10 :y (* psize (inc idx))
-                    :font-size size :ref #(st/set-line-element id %)} 
+                    :font-size size :ref #(st/set-line-element id %)}
              txt])
           (range) lines ids)]))
 

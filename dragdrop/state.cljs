@@ -21,6 +21,9 @@
 (defn get-tag [id]
   (get-in @r-state [:poems-struct :tags id]))
 
+(defn get-lines []
+  (get-in @r-state [:poems-struct :lines]))
+
 (defn set-line-tag-id [line-id tag-id]
   (swap! r-state
          (fn [state]
@@ -28,6 +31,9 @@
 
 (defn get-line-tag-id [line-id]
   (get-in @r-state [:poems-struct :lines line-id :tag-id]))
+
+(defn get-lines-for-tag-id [tag-id]
+  (map first (filter (fn [[_ line]] (= (:tag-id line) tag-id)) (get-lines))))
 
 (defn set-all-line-tag-ids [blank-kw]
   (run! (fn [line-id]
@@ -59,10 +65,6 @@
 
 (defn get-blank-rect [id]
   (get-in @l-state [:blanks id]))
-
-(defn get-lines-for-tag-id [tag-id]
-  (map first (filter (fn [[_ line]] (= (:tag-id line) tag-id))
-                     (get-in @r-state [:poems-struct :lines]))))
 
 (defn get-blank-rects []
   (get @l-state :blanks)
