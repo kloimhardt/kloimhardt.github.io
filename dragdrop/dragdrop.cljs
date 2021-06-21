@@ -22,7 +22,7 @@
 (defn get-line-id-when-mouse-in-fig [x y]
   (->> (st/get-blank-rects)
        (map (fn [[id [x-start x-end top bottom]]]
-              (when (and (< x-start x x-end) (< top y bottom)) id)))
+              (when (and #_(< x-start x x-end) (< top y bottom)) id)))
        (some identity)))
 
 (defn poem-correct? []
@@ -106,10 +106,11 @@
                                          (.-x end)
                                          (.-top client-rect)
                                          (.-bottom client-rect)])
-                    [x-start x-end top bottom] blank-rect]
+                    ;;[x-start x-end top bottom] blank-rect
+                    ]
                 (st/set-blank-rect id blank-rect)
-                ^{:key id}
-                [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
+                ;;^{:key id}
+                #_[:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
                         :height (inc (- bottom top))
                         :fill (st/get-fill)}]))))
         ids lines tags)])
@@ -154,7 +155,7 @@
      [plot-figs p]
      [plot-tags1
       (get (first (get poems-struct :poems)) :line-ids)
-      20]
+      50]
      ]))
 
 (defn main []
