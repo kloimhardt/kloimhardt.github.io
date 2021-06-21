@@ -19,10 +19,10 @@
 (defn end-drag [_e]
   (vswap! st/l-state assoc :current-id nil))
 
-(defn get-line-id-when-mouse-in-fig [x y]
+(defn get-line-id-when-pos-in-fig [x y]
   (->> (st/get-blank-rects)
        (map (fn [[id [x-start x-end top bottom]]]
-              (when (and #_(< x-start x x-end) (< top y bottom)) id)))
+              (when (and (or (true? x) (< x-start x x-end)) (< top y bottom)) id)))
        (some identity)))
 
 (defn poem-correct? []
@@ -35,13 +35,13 @@
 (defn drag [e]
   (when-let [tag-id (:current-id @st/l-state)]
     (let [[ox oy] (:offset @st/l-state)
-          [mx my] (get-mouse-positon e)]
-      (st/set-tag-pos tag-id (+ mx ox) (+ my oy))
-      (if-let [line-id (get-line-id-when-mouse-in-fig mx my)]
+          [mx my] (get-mouse-positon e)
+          [posx posy] [(+ mx ox) (+ my oy)]]
+      (st/set-tag-pos tag-id posx posy)
+      (if-let [line-id (get-line-id-when-pos-in-fig true posy)]
         (when (= (st/get-line-tag-id line-id) :blank)
           (st/set-line-tag-id line-id tag-id)
-          (poem-correct?)
-          )
+          (poem-correct?))
         (when-let [line-id (first (st/get-lines-for-tag-id tag-id))]
           (st/set-line-tag-id line-id :blank))))))
 

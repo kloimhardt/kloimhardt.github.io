@@ -19,7 +19,7 @@
     (.log js/console
           (str (d/plot-figs a)))
     (.log js/console
-          (str (d/get-line-id-when-mouse-in-fig 62 45)))
+          (str (d/get-line-id-when-pos-in-fig 62 45)))
     (.log js/console "ps")
     (.log js/console (rp/poems-struct poems))
     (.log js/console (= (rp/poems-from-struct
