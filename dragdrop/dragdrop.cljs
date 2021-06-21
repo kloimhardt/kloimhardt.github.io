@@ -20,7 +20,7 @@
   (vswap! st/l-state assoc :current-id nil))
 
 (defn get-line-id-when-pos-in-fig [x y]
-  (->> (st/get-blank-rects)
+  (->> (st/get-tag-fig-rects)
        (map (fn [[id [x-start x-end top bottom]]]
               (when (and (or (true? x) (< x-start x x-end)) (< top y bottom)) id)))
        (some identity)))
@@ -80,7 +80,7 @@
                                          (.-top client-rect)
                                          (.-bottom client-rect)])
                     [x-start x-end top bottom] blank-rect]
-                (st/set-blank-rect id blank-rect)
+                (st/set-tag-fig-rect id blank-rect)
                 (when (= tag (:blank-chars @st/l-state))
                   ^{:key id}
                   [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))

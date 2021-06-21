@@ -60,11 +60,8 @@
 (defn get-fill []
   (:fill @l-state))
 
-(defn set-blank-rect [id rect]
+(defn set-tag-fig-rect [id rect]
   (vswap! l-state assoc-in [:blanks id] rect))
 
-(defn get-blank-rect [id]
-  (get-in @l-state [:blanks id]))
-
-(defn get-blank-rects []
+(defn get-tag-fig-rects []
   (get @l-state :blanks))
