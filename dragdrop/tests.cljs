@@ -19,7 +19,7 @@
     (.log js/console
           (str (d/plot-figs a)))
     (.log js/console
-          (str (d/get-blank-id-for-pos 62 45)))
+          (str (d/get-line-id-when-mouse-in-fig 62 45)))
     (.log js/console "ps")
     (.log js/console (rp/poems-struct poems))
     (.log js/console (= (rp/poems-from-struct
@@ -44,6 +44,7 @@
   (.log js/console @st/r-state)
   (.log js/console "rst1")
   (.log js/console (get @st/r-state [:poems-struct :tags 1]))
+  (println (map first (filter (fn [[_ line]] (= (:tag-id line) :blank)) (get-in @st/r-state [:poems-struct :lines]))))
   )
 
 (rp/get-file st/r-state :poems-struct "poems.txt")

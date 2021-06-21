@@ -19,19 +19,22 @@
 (defn end-drag [_e]
   (vswap! st/l-state assoc :current-id nil))
 
-(defn get-blank-id-for-pos [x y]
+(defn get-line-id-when-mouse-in-fig [x y]
   (->> (st/get-blank-rects)
        (map (fn [[id [x-start x-end top bottom]]]
               (when (and (< x-start x x-end) (< top y bottom)) id)))
        (some identity)))
 
 (defn drag [e]
-  (when-let [id (:current-id @st/l-state)]
+  (when-let [tag-id (:current-id @st/l-state)]
     (let [[ox oy] (:offset @st/l-state)
           [mx my] (get-mouse-positon e)]
-      (st/set-tag-pos id (+ mx ox) (+ my oy))
-      (when (get-blank-id-for-pos mx my)
-        nil))))
+      (st/set-tag-pos tag-id (+ mx ox) (+ my oy))
+      (if-let [line-id (get-line-id-when-mouse-in-fig mx my)]
+        (when (= (st/get-line-tag-id line-id) :blank)
+          (st/set-line-tag-id line-id tag-id))
+        (when-let [line-id (first (st/get-lines-for-tag-id tag-id))]
+          (st/set-line-tag-id line-id :blank))))))
 
 (defn dragarea [e]
   (when e
@@ -61,8 +64,8 @@
           ;;[idx1 idx2] [0 1]
           ;;[start end] (when el [(.getStartPositionOfChar el idx1) (.getEndPositionOfChar el idx2)])
           ;;client-rect (when el (first (.getClientRects el)))
-          ;;[sx sy ex ey fsy fey] (when el [(.-x start) (.-y start) 
-          ;;                                (.-x end) (.-y end) 
+          ;;[sx sy ex ey fsy fey] (when el [(.-x start) (.-y start)
+          ;;                                (.-x end) (.-y end)
           ;;                                (.-top client-rect) (.-bottom client-rect)])
           ]
       [:g
@@ -87,17 +90,17 @@
              (when-let [el (st/get-line-element id)]
                (let [idx1 (string/index-of line tag)
                      idx2 (dec (+ idx1 (count tag)))
-                     [start end] (when el [(.getStartPositionOfChar el idx1) 
+                     [start end] (when el [(.getStartPositionOfChar el idx1)
                                            (.getEndPositionOfChar el idx2)])
                      client-rect (when el (first (.getClientRects el)))
-                     blank-rect (when el [(.-x start) 
-                                          (.-x end) 
-                                          (.-top client-rect) 
+                     blank-rect (when el [(.-x start)
+                                          (.-x end)
+                                          (.-top client-rect)
                                           (.-bottom client-rect)])
                      [x-start x-end top bottom] blank-rect]
                  (st/set-blank-rect id blank-rect)
                  ^{:key id}
-                 [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start)) 
+                 [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
                          :height (inc (- bottom top))
                          :fill (st/get-fill)}]))))
          ids lines tags)])
@@ -130,18 +133,8 @@
                    :font-size size} tag]))
         (range) ids)])
 
-(defn set-all-line-tag-ids [blank-kw]
-  (run! (fn [line-id]
-          (swap! st/r-state
-                 (fn [state]
-                   (update-in state [:poems-struct :lines line-id :tag-id]
-                              (fn [tag-id] (when tag-id blank-kw))))))
-   (keys (get-in @st/r-state [:poems-struct :lines]))))
-
 (defn svg-canvas []
-  (let [_ (st/add-new-tag :blank "__")
-        _ (set-all-line-tag-ids :blank)
-        poems-struct (st/get-poems-struct)
+  (let [poems-struct (st/get-poems-struct)
         pms (rp/poems-from-struct poems-struct)
         p (first pms) ;;(blank-out-poem (first pms) "__")
         ]

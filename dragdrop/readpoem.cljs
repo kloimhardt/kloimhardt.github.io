@@ -1,6 +1,7 @@
 (ns readpoem
   (:require [clojure.string :as string]
-            [ajax.core :refer [GET]]))
+            [ajax.core :refer [GET]]
+            [state :as st]))
 
 (defn trim-nil [s]
   (when s (string/trim s)))
@@ -43,27 +44,32 @@
                         poems-from-file))
      :tags tags}))
 
-(defn get-file [state kw filename]
+(defn prepare-poems [plain-text]
+  (st/set-poem-struct (poems-struct (read-poems plain-text)))
+  (st/set-tag :blank "__")
+  (st/set-all-line-tag-ids :blank))
+
+(defn get-file [state kw filename] ;;TODO clean
   (GET filename
     {:format :text
      :headers {"Accept" "application/text"}
-     :handler #(swap! state assoc kw (poems-struct (read-poems %)))}))
+     :handler prepare-poems}))
 
 (defn concat-line [{:keys [part1 tag-id part2]} tags]
   (str part1 (get tags tag-id) part2))
 
 (defn poems-from-struct [{:keys [poems lines tags]}]
-  (mapv (fn [poem] 
+  (mapv (fn [poem]
          {:lines (map (fn [line-id] (concat-line (get lines line-id) tags))
                       (:line-ids poem))
           :tags (map (fn [line-id] (get tags (:tag-id (get lines line-id))))
                      (:line-ids poem))
-          :ids (:line-ids poem)}) 
+          :ids (:line-ids poem)})
        poems))
 
 (defn paste-in-word [stub proposal]
-  (->> (map (fn [s p] (if (and p (> (count s) 1)) 
-                        [(first s) (str " " p " ") (last s)] 
+  (->> (map (fn [s p] (if (and p (> (count s) 1))
+                        [(first s) (str " " p " ") (last s)]
                         s))
             stub proposal)
        (map string/join)))
