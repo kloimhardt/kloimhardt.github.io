@@ -3,8 +3,6 @@
 
 (def r-state (r/atom {}))
 
-(def l-state (volatile! {:fill "#fafafa" :blank-chars "__"}))
-
 (defn get-ui-tags []
   (get-in @r-state [:ui :tags]))
 

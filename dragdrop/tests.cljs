@@ -1,11 +1,12 @@
 (ns tests
   (:require [state :as st]
+            [lstate :as lst]
             [dragdrop :as d]
             [readpoem :as rp]
             [reagent.dom :as dom]))
 
 (defn print-states []
-  (.log js/console @st/l-state)
+  (.log js/console @lst/l-state)
   (.log js/console "rst5")
   (.log js/console @st/r-state)
   (.log js/console "rst1")

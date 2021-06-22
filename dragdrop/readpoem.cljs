@@ -43,7 +43,7 @@
 (defn prepare-poems [plain-text]
   (lst/set-poem-struct-v (poems-struct-v (read-poems plain-text)))
   (lst/set-tag-v :blank (lst/get-blank-chars))
-  (st/set-blank-tags (filter identity (map (fn [[_id l]] (:tag-id l)) (get-in @st/l-state [:poems-struct :lines])))))
+  (st/set-blank-tags (lst/get-tag-ids)))
 
 (defn get-file [filename]
   (GET filename
