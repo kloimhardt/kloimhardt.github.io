@@ -85,7 +85,7 @@
                       (st/set-tag-pos id (+ 10 (* 100 idx)) 200))))
                 ids)])
 
-(defn plot-figs-v [line-ids tags-for-lines reactive-tag-rects fill-color]
+(defn plot-figs [line-ids tags-for-lines reactive-tag-rects fill-color]
   [:<>
    (map (fn [id]
           (let [tag-id (get-in tags-for-lines [id :tag-id])]
@@ -120,7 +120,7 @@
     [:rect {:x 0, :y 0, :width "100%", :height "100%"
             :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
     [plot-poem poem-line-ids all-line-parts all-tags tags-for-lines 20]
-    [plot-figs-v poem-line-ids tags-for-lines reactive-tag-rects fill-color]
+    [plot-figs poem-line-ids tags-for-lines reactive-tag-rects fill-color]
     [plot-tags poem-line-ids all-tags tag-positions 50]]])
 
 (defn main []

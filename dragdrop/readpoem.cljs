@@ -45,8 +45,8 @@
   (lst/set-tag :blank (lst/get-blank-chars))
   (st/set-blank-tags (lst/get-tag-ids)))
 
-(defn get-file [filename]
+(defn get-file [filename handler]
   (GET filename
     {:format :text
      :headers {"Accept" "application/text"}
-     :handler prepare-poems}))
+     :handler handler}))
