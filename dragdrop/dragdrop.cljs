@@ -113,28 +113,30 @@
               :style {:cursor :move} :font-size font-size}
        text])))
 
-(defn plot-tags [ids size]
+(defn plot-tags [ids all-tags tag-positions size]
   [:<>
    (map (fn [idx id]
-          (when-let [tag (lst/get-tag id)]
+          (when-let [tag (get all-tags id)]
             ^{:key id}
             [plot-tag {:id id :x (+ 10 (* 100 idx)) :y 200
                    :font-size size} tag]))
         (range) ids)])
 
-(defn svg-canvas [poem-line-ids all-lines all-tags reactive-tags fill-color]
+(defn svg-canvas [poem-line-ids tags-for-lines all-line-parts all-tags tag-positions fill-color]
   [:div
    [:svg {:width "100%" :height "70%"}
     [:rect {:x 0, :y 0, :width "100%", :height "100%"
             :fill fill-color :ref dragarea}]
-    [plot-poem poem-line-ids all-lines all-tags reactive-tags 20]
+    [plot-poem poem-line-ids all-line-parts all-tags tags-for-lines 20]
     [plot-figs-v poem-line-ids]
-    [plot-tags poem-line-ids 50]]])
+    [plot-tags poem-line-ids all-tags tag-positions 50]]])
 
 (defn main []
-  (let [poems-struct-v (lst/get-poems-struct-v)
-        {:keys [line-ids] :as first-poem} (first (:poems poems-struct-v))
-        {:keys [lines tags]} poems-struct-v
-        reactive-tags (:lines (st/get-poems-struct))
-        fill-color (lst/get-fill)]
-    [svg-canvas line-ids lines tags reactive-tags fill-color]))
+  (let [fill-color (lst/get-fill)]
+    (fn []
+      (let [reactive-tags (:lines (st/get-poems-struct))
+            reactive-tag-positions (get-in @st/r-state [:ui :tags])
+            poems-struct-v (lst/get-poems-struct-v)
+            {:keys [line-ids] :as first-poem} (first (:poems poems-struct-v))
+            {:keys [lines tags]} poems-struct-v]
+        [svg-canvas line-ids reactive-tags lines tags reactive-tag-positions fill-color]))))
