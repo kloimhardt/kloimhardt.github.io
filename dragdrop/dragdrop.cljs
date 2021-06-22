@@ -129,7 +129,7 @@
       (let [reactive-tags (st/get-lines)
             reactive-tag-positions (st/get-ui-tags)
             reactive-tag-rects (st/get-tag-fig-rects)
-            poems-struct-v (lst/get-poems-struct-v)
-            {:keys [line-ids]} (first (:poems poems-struct-v))
-            {:keys [lines tags]} poems-struct-v]
+            poems-struct (lst/get-poems-struct)
+            {:keys [line-ids]} (first (:poems poems-struct))
+            {:keys [lines tags]} poems-struct]
         [svg-canvas line-ids reactive-tags lines tags reactive-tag-positions reactive-tag-rects fill-color]))))

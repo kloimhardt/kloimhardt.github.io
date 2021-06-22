@@ -41,8 +41,8 @@
      :tags tags}))
 
 (defn prepare-poems [plain-text]
-  (lst/set-poem-struct-v (poems-struct-v (read-poems plain-text)))
-  (lst/set-tag-v :blank (lst/get-blank-chars))
+  (lst/set-poem-struct (poems-struct-v (read-poems plain-text)))
+  (lst/set-tag :blank (lst/get-blank-chars))
   (st/set-blank-tags (lst/get-tag-ids)))
 
 (defn get-file [filename]

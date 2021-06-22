@@ -3,7 +3,10 @@
 
 (def l-state (volatile! {:fill "#fafafa" :blank-chars "__"}))
 
-(defn get-poems-struct-v []
+(defn set-poem-struct [pst]
+  (vswap! l-state assoc :poems-struct pst))
+
+(defn get-poems-struct []
   (get @l-state :poems-struct))
 
 (defn get-fill []
@@ -21,10 +24,7 @@
 (defn get-current-tag-offset []
   (get @l-state :offset))
 
-(defn set-poem-struct-v [pst]
-  (vswap! l-state assoc :poems-struct pst))
-
-(defn set-tag-v [id tag-txt]
+(defn set-tag [id tag-txt]
   (vswap! l-state assoc-in [:poems-struct :tags id] tag-txt))
 
 (defn get-blank-chars []
