@@ -73,13 +73,13 @@
      :headers {"Accept" "application/text"}
      :handler prepare-poems}))
 
-(defn concat-line [{:keys [part1 tag-id part2]} tags]
+#_(defn concat-line [{:keys [part1 tag-id part2]} tags]
   (str part1 (get tags tag-id) part2))
 
-(defn concat-line-v [{:keys [part1 _ part2]} {:keys [_ tag-id _]} tags]
+#_(defn concat-line-v [{:keys [part1 _ part2]} {:keys [_ tag-id _]} tags]
   (str part1 (get tags tag-id) part2))
 
-(defn poems-from-struct [{:keys [poems lines tags]}]
+#_(defn poems-from-struct [{:keys [poems lines tags]}]
   (mapv (fn [poem]
          {:lines (map (fn [line-id] (concat-line (get lines line-id) tags))
                       (:line-ids poem))

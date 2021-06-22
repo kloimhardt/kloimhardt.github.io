@@ -65,19 +65,17 @@
         (.addEventListener "touchstart" (start-drag id))
         dragarea))))
 
-(defn calc-tag-fig-rect [line-element str-line tag]
-(when tag
-            (when-let [el line-element]
-              (let [idx1 (string/index-of str-line tag)
-                    idx2 (dec (+ idx1 (count tag)))
-                    [start end] (when el [(.getStartPositionOfChar el idx1)
-                                          (.getEndPositionOfChar el idx2)])
-                    client-rect (when el (first (.getClientRects el)))
-                    blank-rect (when el [(.-x start)
-                                         (.-x end)
-                                         (.-top client-rect)
-                                         (.-bottom client-rect)])]
-                blank-rect))))
+(defn calc-tag-fig-rect [el str-line tag]
+  (let [idx1 (string/index-of str-line tag)
+        idx2 (dec (+ idx1 (count tag)))
+        [start end]  [(.getStartPositionOfChar el idx1)
+                               (.getEndPositionOfChar el idx2)]
+        client-rect  (first (.getClientRects el))
+        blank-rect  [(.-x start)
+                              (.-x end)
+                              (.-top client-rect)
+                              (.-bottom client-rect)]]
+    blank-rect))
 
 (defn plot-figs-v [ids]
   [:<>
@@ -91,36 +89,34 @@
                         :fill (lst/get-fill)}]))))
         ids)])
 
-(defn plot-poem [line-ids lines tags r-lines size]
+(defn plot-poem [line-ids lines tags tags-for-lines size]
   (let [psize (* size 1.5)]
     [:<>
      (map-indexed (fn [idx line-id]
-            (let [str-tag (get tags (:tag-id (get r-lines line-id)))
-                  str-line (rp/concat-line-v (get lines line-id) (get r-lines line-id) tags)]
+                    (let [tag-id (get-in tags-for-lines [line-id :tag-id])
+                          tag (get tags tag-id)
+                          {:keys [part1 part2] :as line} (get lines line-id)
+                          str-line (str part1 tag part2)]
               ^{:key line-id}
               [:text {:x 10 :y (* psize (inc idx))
                       :font-size size :ref (fn [el]
-                                             (if-let [tag-fig-rect (calc-tag-fig-rect el str-line str-tag)]
-                                               (lst/set-tag-fig-rect-v line-id tag-fig-rect)))}
+                                             (when (and el tag)
+                                               (lst/set-tag-fig-rect-v line-id
+                                                                       (calc-tag-fig-rect el str-line tag))))}
                str-line]))
            line-ids)]))
 
-(defn plot-tag [{:keys [id x y]} _text]
-  (st/set-tag-pos id x y)
-  (fn [{:keys [id font-size]} text]
-    (let [[px py] (st/get-tag-pos id)]
-      [:text {:x px :y py :ref (make-draggable id)
-              :style {:cursor :move} :font-size font-size}
-       text])))
-
-(defn plot-tags [ids all-tags tag-positions size]
+(defn plot-tags [ids all-tags tag-positions font-size]
   [:<>
-   (map (fn [idx id]
+   (map-indexed (fn [idx id]
           (when-let [tag (get all-tags id)]
-            ^{:key id}
-            [plot-tag {:id id :x (+ 10 (* 100 idx)) :y 200
-                   :font-size size} tag]))
-        (range) ids)])
+            (if-let [pos (get-in tag-positions [id :pos])]
+              ^{:key id}
+              [:text {:x (first pos) :y (last pos) :ref (make-draggable id)
+                      :style {:cursor :move} :font-size font-size}
+               tag]
+              (st/set-tag-pos id (+ 10 (* 100 idx)) 200))))
+         ids)])
 
 (defn svg-canvas [poem-line-ids tags-for-lines all-line-parts all-tags tag-positions fill-color]
   [:div
