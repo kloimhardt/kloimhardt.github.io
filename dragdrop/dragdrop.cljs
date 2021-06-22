@@ -46,24 +46,21 @@
         (when-let [line-id (first (st/get-lines-for-tag-id tag-id))]
           (st/set-line-tag-id line-id :blank))))))
 
-(defn dragarea [e]
-  (when e
-    (doto e
-      (.addEventListener "mousemove" drag)
-      (.addEventListener "touchmove" drag)
-      (.addEventListener "mouseup" end-drag)
-      (.addEventListener "touchend" end-drag)
-      #_(.addEventListener "touchleave" end-drag)
-      #_(.addEventListener "touchcancel" end-drag)
-      #_(.addEventListener "mouseleave" end-drag))))
+(defn dragarea [el]
+  (doto el
+    (.addEventListener "mousemove" drag)
+    (.addEventListener "touchmove" drag)
+    (.addEventListener "mouseup" end-drag)
+    (.addEventListener "touchend" end-drag)
+    #_(.addEventListener "touchleave" end-drag)
+    #_(.addEventListener "touchcancel" end-drag)
+    #_(.addEventListener "mouseleave" end-drag)))
 
-(defn make-draggable [id]
-  (fn [e]
-    (when e
-      (doto e
-        (.addEventListener "mousedown" (start-drag id))
-        (.addEventListener "touchstart" (start-drag id))
-        dragarea))))
+(defn make-draggable [el id]
+  (doto el
+    (.addEventListener "mousedown" (start-drag id))
+    (.addEventListener "touchstart" (start-drag id))
+    dragarea))
 
 (defn calc-tag-fig-rect [el str-line tag]
   (let [idx1 (string/index-of str-line tag)
@@ -77,10 +74,12 @@
                               (.-bottom client-rect)]]
     blank-rect))
 
-(defn plot-figs-v [ids]
+(defn plot-figs-v [ids tags-for-lines]
   [:<>
    (map (fn [id]
-          (let [tag-id (get-in @st/r-state [:poems-struct :lines id :tag-id])]
+          (let [tag-id1 (get-in @st/r-state [:poems-struct :lines id :tag-id])
+                tag-id (get-in tags-for-lines [id :tag-id])]
+            (println tag-id)
             (when (= tag-id :blank)
               (let [[x-start x-end top bottom] (lst/get-tag-fig-rect id)]
                 ^{:key id}
@@ -112,7 +111,7 @@
           (when-let [tag (get all-tags id)]
             (if-let [pos (get-in tag-positions [id :pos])]
               ^{:key id}
-              [:text {:x (first pos) :y (last pos) :ref (make-draggable id)
+              [:text {:x (first pos) :y (last pos) :ref (fn [el] (when el (make-draggable el id)))
                       :style {:cursor :move} :font-size font-size}
                tag]
               (st/set-tag-pos id (+ 10 (* 100 idx)) 200))))
@@ -122,9 +121,9 @@
   [:div
    [:svg {:width "100%" :height "70%"}
     [:rect {:x 0, :y 0, :width "100%", :height "100%"
-            :fill fill-color :ref dragarea}]
+            :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
     [plot-poem poem-line-ids all-line-parts all-tags tags-for-lines 20]
-    [plot-figs-v poem-line-ids]
+    [plot-figs-v poem-line-ids tags-for-lines]
     [plot-tags poem-line-ids all-tags tag-positions 50]]])
 
 (defn main []
