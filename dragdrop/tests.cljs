@@ -14,8 +14,7 @@
           (str (d/plot-poem a 20)))
     (.log js/console
           (str (d/plot-tags a 20)))
-    (.log js/console
-          (str (d/plot-figs a)))
+    
     (.log js/console
           (str (d/get-line-id-when-pos-in-fig 62 45)))
     (.log js/console "ps")

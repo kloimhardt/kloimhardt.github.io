@@ -2,6 +2,7 @@
 
 (ns dragdrop
   (:require [state :as st]
+            [lstate :as lst]
             [readpoem :as rp]
             [clojure.string :as string]))
 
@@ -118,17 +119,14 @@
     [:<>
      (map-indexed (fn [idx line-id]
             (let [str-tag (get tags (:tag-id (get r-lines line-id)))
-                  str-line (rp/concat-line-v (get lines line-id) (get r-lines line-id) tags)
-                  ]
+                  str-line (rp/concat-line-v (get lines line-id) (get r-lines line-id) tags)]
               ^{:key line-id}
               [:text {:x 10 :y (* psize (inc idx))
                       :font-size size :ref (fn [el]
                                              (st/set-line-element line-id el)
                                              (if-let [tag-fig-rect (calc-tag-fig-rect el str-line str-tag)]
-                                               (st/set-tag-fig-rect-v line-id tag-fig-rect))
-                                             )}
-               str-line
-               ]))
+                                               (lst/set-tag-fig-rect-v line-id tag-fig-rect)))}
+               str-line]))
            line-ids)]))
 
 (defn plot-tag [{:keys [id x y]} _text]
@@ -142,32 +140,23 @@
 (defn plot-tags [ids size]
   [:<>
    (map (fn [idx id]
-          (when-let [tag (st/get-tag id)]
+          (when-let [tag (lst/get-tag id)]
             ^{:key id}
             [plot-tag {:id id :x (+ 10 (* 100 idx)) :y 200
                    :font-size size} tag]))
         (range) ids)])
 
 (defn svg-canvas []
-  (let [poems-struct (st/get-poems-struct)
-        first-poem (first (:poems poems-struct))
-        poems-struct-v (st/get-poems-struct-v)
+  (let [poems-struct-v (lst/get-poems-struct-v)
         first-poem-v (first (:poems poems-struct-v))
-        pms (rp/poems-from-struct poems-struct)
-        p (first pms)]
+        reactive-tags (:lines (st/get-poems-struct))]
     [:div
      [:svg {:width "100%" :height "70%"}
       [:rect {:x 0, :y 0, :width "100%", :height "100%"
-              :fill (st/get-fill) :ref dragarea}]
-      [plot-poem (:line-ids first-poem-v) (:lines poems-struct-v) (:tags poems-struct) (:lines poems-struct) 20]
-      ;;[plot-figs p]
+              :fill (lst/get-fill) :ref dragarea}]
+      [plot-poem (:line-ids first-poem-v) (:lines poems-struct-v) (:tags poems-struct-v) reactive-tags 20]
       [plot-figs-v (:line-ids first-poem-v)]
-      [plot-tags (:line-ids first-poem) 50]]
-     [:p (str (:tag-figs @st/l-state))]
-     [:p (str (:tag-figs-v @st/l-state))]
-     ]))
+      [plot-tags (:line-ids first-poem-v) 50]]]))
 
 (defn main []
-  [:div
-   [svg-canvas]
-   ])
+  [svg-canvas])
