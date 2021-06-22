@@ -8,7 +8,9 @@
   (.log js/console @st/l-state)
   (.log js/console "rst5")
   (.log js/console @st/r-state)
-  (.log js/console "rst1"))
+  (.log js/console "rst1")
+  (println nil)
+  )
 
 (rp/get-file "poems.txt")
 

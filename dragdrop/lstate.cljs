@@ -24,3 +24,6 @@
 
 (defn set-tag-v [id tag-txt]
   (vswap! st/l-state assoc-in [:poems-struct :tags id] tag-txt))
+
+(defn get-blank-chars []
+  (:blank-chars @st/l-state))

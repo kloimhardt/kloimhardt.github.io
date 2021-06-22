@@ -25,21 +25,6 @@
           {:part1 part1 :tag-id tag-id :part2 part2}))
       {:part1 line :tag-id nil :part2 nil})))
 
-(defn poems-struct [poems-from-file]
-  (let [tags (apply merge
-                    (filter identity
-                            (map (fn [{:keys [ids tags]}]
-                                   (into {} (map (fn [id tag] (when tag [id tag]))
-                                                 ids tags)))
-                                 poems-from-file)))]
-    {:poems (map-indexed (fn [id {:keys [ids]}] {:id id :line-ids ids})  poems-from-file)
-     :lines (apply merge
-                   (map (fn [{:keys [ids lines]}]
-                          (into {} (map (fn [id line] [id (split-line line id tags)])
-                                        ids lines)))
-                        poems-from-file))
-     :tags tags}))
-
 (defn poems-struct-v [poems-from-file]
   (let [tags (apply merge
                     (filter identity
@@ -57,9 +42,8 @@
 
 (defn prepare-poems [plain-text]
   (lst/set-poem-struct-v (poems-struct-v (read-poems plain-text)))
-  (lst/set-tag-v :blank (st/get-blank-chars))
-  (st/set-poem-struct (poems-struct (read-poems plain-text)))
-  (st/set-all-line-tag-ids :blank))
+  (lst/set-tag-v :blank (lst/get-blank-chars))
+  (st/set-blank-tags (filter identity (map (fn [[_id l]] (:tag-id l)) (get-in @st/l-state [:poems-struct :lines])))))
 
 (defn get-file [filename]
   (GET filename
