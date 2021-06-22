@@ -3,7 +3,6 @@
 (ns dragdrop
   (:require [state :as st]
             [lstate :as lst]
-            [readpoem :as rp]
             [clojure.string :as string]))
 
 (defn get-mouse-positon [e]
@@ -12,13 +11,13 @@
 
 (defn start-drag [id]
   (fn [e]
-    (st/set-current-tag-id id)
+    (lst/set-current-tag-id id)
     (let [[x y] (st/get-tag-pos id)
           [mx my] (get-mouse-positon e)]
-      (st/set-current-tag-offset (- x mx) (- y my)))))
+      (lst/set-current-tag-offset (- x mx) (- y my)))))
 
 (defn end-drag [_e]
-  (st/set-current-tag-id nil))
+  (lst/set-current-tag-id nil))
 
 (defn get-line-id-when-pos-in-fig [x y]
   (->> (st/get-tag-fig-rects)
@@ -34,8 +33,8 @@
       (println "good")))
 
 (defn drag [e]
-  (when-let [tag-id (st/get-current-tag-id)]
-    (let [[ox oy] (st/get-current-tag-offset)
+  (when-let [tag-id (lst/get-current-tag-id)]
+    (let [[ox oy] (lst/get-current-tag-offset)
           [mx my] (get-mouse-positon e)
           [posx posy] [(+ mx ox) (+ my oy)]]
       (st/set-tag-pos tag-id posx posy)
@@ -86,7 +85,7 @@
                       (st/set-tag-pos id (+ 10 (* 100 idx)) 200))))
                 ids)])
 
-(defn plot-figs-v [line-ids tags-for-lines reactive-tag-rects]
+(defn plot-figs-v [line-ids tags-for-lines reactive-tag-rects fill-color]
   [:<>
    (map (fn [id]
           (let [tag-id (get-in tags-for-lines [id :tag-id])]
@@ -95,7 +94,7 @@
                 ^{:key [id]}
                 [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
                         :height (inc (- bottom top))
-                        :fill (lst/get-fill)}]))))
+                        :fill fill-color}]))))
         line-ids)])
 
 (defn plot-poem [line-ids lines tags tags-for-lines size]
@@ -121,7 +120,7 @@
     [:rect {:x 0, :y 0, :width "100%", :height "100%"
             :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
     [plot-poem poem-line-ids all-line-parts all-tags tags-for-lines 20]
-    [plot-figs-v poem-line-ids tags-for-lines reactive-tag-rects]
+    [plot-figs-v poem-line-ids tags-for-lines reactive-tag-rects fill-color]
     [plot-tags poem-line-ids all-tags tag-positions 50]]])
 
 (defn main []
