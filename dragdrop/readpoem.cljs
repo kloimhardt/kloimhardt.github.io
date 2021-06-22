@@ -1,7 +1,8 @@
 (ns readpoem
   (:require [clojure.string :as string]
             [ajax.core :refer [GET]]
-            [state :as st]))
+            [state :as st]
+            [lstate :as lst]))
 
 (defn trim-nil [s]
   (when s (string/trim s)))
@@ -14,11 +15,6 @@
     [{:lines (->> vect (map first) (map string/trim))
       :tags (->> vect (map fnext) (map trim-nil))
       :ids (range (count vect))}]))
-
-(defn cut-out-word [{:keys [lines tags]}]
-  (->> (map (fn [x y] (if y (string/split x (re-pattern y)) [x]))
-            lines tags)
-       (map #(map string/trim %))))
 
 (defn split-line [line tag-id tags]
   (let [tag (get tags tag-id)]
@@ -60,37 +56,13 @@
      :tags tags}))
 
 (defn prepare-poems [plain-text]
-  (st/set-poem-struct-v (poems-struct-v (read-poems plain-text)))
-  (st/set-tag-v :blank (st/get-blank-chars))
+  (lst/set-poem-struct-v (poems-struct-v (read-poems plain-text)))
+  (lst/set-tag-v :blank (st/get-blank-chars))
   (st/set-poem-struct (poems-struct (read-poems plain-text)))
-  (st/set-tag :blank (st/get-blank-chars))
-  (st/set-all-line-tag-ids :blank)
-  )
+  (st/set-all-line-tag-ids :blank))
 
 (defn get-file [filename]
   (GET filename
     {:format :text
      :headers {"Accept" "application/text"}
      :handler prepare-poems}))
-
-#_(defn concat-line [{:keys [part1 tag-id part2]} tags]
-  (str part1 (get tags tag-id) part2))
-
-#_(defn concat-line-v [{:keys [part1 _ part2]} {:keys [_ tag-id _]} tags]
-  (str part1 (get tags tag-id) part2))
-
-#_(defn poems-from-struct [{:keys [poems lines tags]}]
-  (mapv (fn [poem]
-         {:lines (map (fn [line-id] (concat-line (get lines line-id) tags))
-                      (:line-ids poem))
-          :tags (map (fn [line-id] (get tags (:tag-id (get lines line-id))))
-                     (:line-ids poem))
-          :ids (:line-ids poem)})
-       poems))
-
-(defn paste-in-word [stub proposal]
-  (->> (map (fn [s p] (if (and p (> (count s) 1))
-                        [(first s) (str " " p " ") (last s)]
-                        s))
-            stub proposal)
-       (map string/join)))

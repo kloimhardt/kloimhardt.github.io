@@ -126,8 +126,8 @@
 (defn main []
   (let [fill-color (lst/get-fill)]
     (fn []
-      (let [reactive-tags (:lines (st/get-poems-struct))
-            reactive-tag-positions (get-in @st/r-state [:ui :tags])
+      (let [reactive-tags (st/get-lines)
+            reactive-tag-positions (st/get-ui-tags)
             reactive-tag-rects (st/get-tag-fig-rects)
             poems-struct-v (lst/get-poems-struct-v)
             {:keys [line-ids]} (first (:poems poems-struct-v))

@@ -8,23 +8,23 @@
 (defn set-poem-struct [pst]
   (swap! r-state assoc :poems-struct pst))
 
-(defn set-poem-struct-v [pst]
-  (vswap! l-state assoc :poems-struct pst))
-
-(defn get-poems-struct []
+#_(defn get-poems-struct []
   (get @r-state :poems-struct))
 
-(defn get-poems-struct-v []
+#_(defn get-poems-struct-v []
   (get @l-state :poems-struct))
 
 (defn set-tag [id tag-txt]
   (swap! r-state assoc-in [:poems-struct :tags id] tag-txt))
 
-(defn set-tag-v [id tag-txt]
+#_(defn set-tag-v [id tag-txt]
   (vswap! l-state assoc-in [:poems-struct :tags id] tag-txt))
 
-(defn get-tag [id]
+#_(defn get-tag [id]
   (get-in @r-state [:poems-struct :tags id]))
+
+(defn get-ui-tags []
+  (get-in @r-state [:ui :tags]))
 
 (defn get-lines []
   (get-in @r-state [:poems-struct :lines]))
