@@ -67,13 +67,10 @@
   (:blank-chars @l-state))
 
 (defn set-tag-fig-rect [id rect]
-  (vswap! l-state assoc-in [:tag-figs id :rect] rect))
-
-(defn set-tag-fig-rect-v [id rect]
-  (vswap! l-state assoc-in [:tag-figs-v id :rect] rect))
+  (swap! r-state assoc-in [:ui :lines id :fig-rect] rect))
 
 (defn get-tag-fig-rects []
-  (into {} (map (fn [[id r]] [id (:rect r)]) (:tag-figs @l-state))))
+  (into {} (map (fn [[id r]] [id (:fig-rect r)]) (get-in @r-state [:ui :lines]))))
 
 (defn set-current-tag-id [id]
   (vswap! l-state assoc :current-id id))
