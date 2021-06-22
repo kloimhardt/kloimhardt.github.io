@@ -42,9 +42,13 @@
   (.log js/console @st/r-state)
   (.log js/console "rst1")
   (let [poems-struct (st/get-poems-struct)
+        first-poem (first (:poems poems-struct))
+        poems-struct-v (st/get-poems-struct-v)
+        first-poem-v (first (:poems poems-struct-v))
         pms (rp/poems-from-struct poems-struct)
         p (first pms)]
-    (println (d/plot-poem (first (:poems poems-struct)) (:lines poems-struct) (:tags poems-struct) 20))
+    (println (d/plot-figs p))
+    (println (d/plot-figs-v (:line-ids first-poem-v)))
     )
 
   )

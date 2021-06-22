@@ -44,10 +44,28 @@
                         poems-from-file))
      :tags tags}))
 
+(defn poems-struct-v [poems-from-file]
+  (let [tags (apply merge
+                    (filter identity
+                            (map (fn [{:keys [ids tags]}]
+                                   (into {} (map (fn [id tag] (when tag [id tag]))
+                                                 ids tags)))
+                                 poems-from-file)))]
+    {:poems (map-indexed (fn [id {:keys [ids]}] {:id id :line-ids ids})  poems-from-file)
+     :lines (apply merge
+                   (map (fn [{:keys [ids lines]}]
+                          (into {} (map (fn [id line] [id (split-line line id tags)])
+                                        ids lines)))
+                        poems-from-file))
+     :tags tags}))
+
 (defn prepare-poems [plain-text]
   (st/set-poem-struct (poems-struct (read-poems plain-text)))
   (st/set-tag :blank (st/get-blank-chars))
-  (st/set-all-line-tag-ids :blank))
+  (st/set-all-line-tag-ids :blank)
+  (st/set-poem-struct-v (poems-struct-v (read-poems plain-text)))
+  (st/set-tag-v :blank (st/get-blank-chars))
+  )
 
 (defn get-file [filename]
   (GET filename
@@ -56,6 +74,9 @@
      :handler prepare-poems}))
 
 (defn concat-line [{:keys [part1 tag-id part2]} tags]
+  (str part1 (get tags tag-id) part2))
+
+(defn concat-line-v [{:keys [part1 _ part2]} {:keys [_ tag-id _]} tags]
   (str part1 (get tags tag-id) part2))
 
 (defn poems-from-struct [{:keys [poems lines tags]}]

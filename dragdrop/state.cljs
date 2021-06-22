@@ -3,14 +3,25 @@
 
 (def r-state (r/atom {}))
 
+(def l-state (volatile! {:fill "#fafafa" :blank-chars "__"}))
+
 (defn set-poem-struct [pst]
   (swap! r-state assoc :poems-struct pst))
+
+(defn set-poem-struct-v [pst]
+  (vswap! l-state assoc :poems-struct pst))
 
 (defn get-poems-struct []
   (get @r-state :poems-struct))
 
+(defn get-poems-struct-v []
+  (get @l-state :poems-struct))
+
 (defn set-tag [id tag-txt]
   (swap! r-state assoc-in [:poems-struct :tags id] tag-txt))
+
+(defn set-tag-v [id tag-txt]
+  (vswap! l-state assoc-in [:poems-struct :tags id] tag-txt))
 
 (defn get-tag [id]
   (get-in @r-state [:poems-struct :tags id]))
@@ -49,8 +60,6 @@
 (defn get-line-element [id]
   (get-in @r-state [:ui :lines id :element]))
 
-(def l-state (volatile! {:fill "#fafafa" :blank-chars "__"}))
-
 (defn get-fill []
   (:fill @l-state))
 
@@ -59,6 +68,9 @@
 
 (defn set-tag-fig-rect [id rect]
   (vswap! l-state assoc-in [:tag-figs id :rect] rect))
+
+(defn set-tag-fig-rect-v [id rect]
+  (vswap! l-state assoc-in [:tag-figs-v id :rect] rect))
 
 (defn get-tag-fig-rects []
   (into {} (map (fn [[id r]] [id (:rect r)]) (:tag-figs @l-state))))

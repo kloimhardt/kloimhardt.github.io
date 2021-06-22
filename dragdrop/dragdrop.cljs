@@ -64,6 +64,20 @@
         (.addEventListener "touchstart" (start-drag id))
         dragarea))))
 
+(defn calc-tag-fig-rect [line-element str-line tag]
+(when tag
+            (when-let [el line-element]
+              (let [idx1 (string/index-of str-line tag)
+                    idx2 (dec (+ idx1 (count tag)))
+                    [start end] (when el [(.getStartPositionOfChar el idx1)
+                                          (.getEndPositionOfChar el idx2)])
+                    client-rect (when el (first (.getClientRects el)))
+                    blank-rect (when el [(.-x start)
+                                         (.-x end)
+                                         (.-top client-rect)
+                                         (.-bottom client-rect)])]
+                blank-rect))))
+
 (defn plot-figs [{:keys [lines tags ids]}]
   [:<>
    (map (fn [id line tag]
@@ -87,15 +101,35 @@
                           :fill (st/get-fill)}])))))
         ids lines tags)])
 
-(defn plot-poem [poem lines tags size]
+(defn plot-figs-v [ids]
+  [:<>
+   (map (fn [id]
+          (let [tag-id (get-in @st/r-state [:poems-struct :lines id :tag-id])]
+            (when (= tag-id :blank)
+              (let [[x-start x-end top bottom] (get-in @st/l-state [:tag-figs-v id :rect])]
+                ^{:key id}
+                [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
+                        :height (inc (- bottom top))
+                        :fill (st/get-fill)}]))))
+        ids)])
+
+(defn plot-poem [line-ids lines tags r-lines size]
   (let [psize (* size 1.5)]
     [:<>
-     (map (fn [idx line-id]
-            ^{:key line-id}
-            [:text {:x 10 :y (* psize (inc idx))
-                    :font-size size :ref #(st/set-line-element line-id %)}
-             (rp/concat-line (get lines line-id) tags)])
-          (range) (:line-ids poem))]))
+     (map-indexed (fn [idx line-id]
+            (let [str-tag (get tags (:tag-id (get r-lines line-id)))
+                  str-line (rp/concat-line-v (get lines line-id) (get r-lines line-id) tags)
+                  ]
+              ^{:key line-id}
+              [:text {:x 10 :y (* psize (inc idx))
+                      :font-size size :ref (fn [el]
+                                             (st/set-line-element line-id el)
+                                             (if-let [tag-fig-rect (calc-tag-fig-rect el str-line str-tag)]
+                                               (st/set-tag-fig-rect-v line-id tag-fig-rect))
+                                             )}
+               str-line
+               ]))
+           line-ids)]))
 
 (defn plot-tag [{:keys [id x y]} _text]
   (st/set-tag-pos id x y)
@@ -117,14 +151,23 @@
 (defn svg-canvas []
   (let [poems-struct (st/get-poems-struct)
         first-poem (first (:poems poems-struct))
+        poems-struct-v (st/get-poems-struct-v)
+        first-poem-v (first (:poems poems-struct-v))
         pms (rp/poems-from-struct poems-struct)
         p (first pms)]
-    [:svg {:width "100%" :height "70%"}
-     [:rect {:x 0, :y 0, :width "100%", :height "100%"
-             :fill (st/get-fill) :ref dragarea}]
-     [plot-poem first-poem (:lines poems-struct) (:tags poems-struct) 20]
-     [plot-figs p]
-     [plot-tags (get first-poem :line-ids) 50]]))
+    [:div
+     [:svg {:width "100%" :height "70%"}
+      [:rect {:x 0, :y 0, :width "100%", :height "100%"
+              :fill (st/get-fill) :ref dragarea}]
+      [plot-poem (:line-ids first-poem-v) (:lines poems-struct-v) (:tags poems-struct) (:lines poems-struct) 20]
+      ;;[plot-figs p]
+      [plot-figs-v (:line-ids first-poem-v)]
+      [plot-tags (:line-ids first-poem) 50]]
+     [:p (str (:tag-figs @st/l-state))]
+     [:p (str (:tag-figs-v @st/l-state))]
+     ]))
 
 (defn main []
-  [svg-canvas])
+  [:div
+   [svg-canvas]
+   ])
