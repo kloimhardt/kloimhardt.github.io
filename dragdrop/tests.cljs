@@ -46,7 +46,7 @@
         first-poem-v (first (:poems poems-struct-v))
         pms (rp/poems-from-struct poems-struct)
         p (first pms)]
-    (println (d/plot-figs p))
+    #_(println (d/plot-figs p))
     (println (d/plot-figs-v (:line-ids first-poem-v)))
     )
 

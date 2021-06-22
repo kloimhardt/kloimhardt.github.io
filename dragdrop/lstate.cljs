@@ -21,14 +21,15 @@
 (defn get-blank-chars []
   (:blank-chars @st/l-state))
 
-(defn set-tag-fig-rect [id rect]
+(defn set-tag-fig-rect-v [id rect]
   (vswap! st/l-state assoc-in [:tag-figs id :rect] rect))
 
-(defn set-tag-fig-rect-v [id rect]
-  (vswap! st/l-state assoc-in [:tag-figs-v id :rect] rect))
+(defn get-tag-fig-rect [id]
+  (get-in @st/l-state [:tag-figs id :rect]))
 
 (defn get-tag-fig-rects []
-  (into {} (map (fn [[id r]] [id (:rect r)]) (:tag-figs @st/l-state))))
+  (into {} (map (fn [[id r]] [id (:rect r)])
+                (:tag-figs @st/l-state))))
 
 (defn set-current-tag-id [id]
   (vswap! st/l-state assoc :current-id id))
