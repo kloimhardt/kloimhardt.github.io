@@ -16,28 +16,18 @@
       :tags (->> vect (map fnext) (map trim-nil))
       :ids (range (count vect))}]))
 
-(defn split-line [line tag-id tags]
-  (let [tag (get tags tag-id)]
-    (if (and tag (re-find (re-pattern tag) line))
-      (if (string/starts-with? line tag)
-        {:part1 nil :tag tag :part2 (subs line (count tag))}
-        (let [[part1 part2] (string/split line (re-pattern tag))]
-          {:part1 part1 :tag tag :part2 part2}))
-      {:part1 line :tag nil :part2 nil})))
+(defn split-line [line tag]
+  (if (and tag (re-find (re-pattern tag) line))
+    (if (string/starts-with? line tag)
+      {:part1 nil :tag tag :part2 (subs line (count tag))}
+      (let [[part1 part2] (string/split line (re-pattern tag))]
+        {:part1 part1 :tag tag :part2 part2}))
+    {:part1 line :tag nil :part2 nil}))
 
 (defn poems-struct [poems-from-file]
-  (let [tags (apply merge
-                    (filter identity
-                            (map (fn [{:keys [ids tags]}]
-                                   (into {} (map (fn [id tag] (when tag [id tag]))
-                                                 ids tags)))
-                                 poems-from-file)))]
-    {:poems (map-indexed (fn [id {:keys [ids]}] {:id id :line-ids ids})  poems-from-file)
-     :lines (apply merge
-                   (map (fn [{:keys [ids lines]}]
-                          (into {} (map (fn [id line] [id (split-line line id tags)])
-                                        ids lines)))
-                        poems-from-file))}))
+  (let [{:keys [lines tags]} (first poems-from-file)]
+    {:poems [{:id 0 :line-ids (range (count lines))}]
+     :lines (into {} (map (fn[idx line tag] [idx (split-line line tag)]) (range) lines tags))}))
 
 (defn prepare-poems [plain-text]
   (lst/set-poem-struct (poems-struct (read-poems plain-text)))
