@@ -20,10 +20,10 @@
   (let [tag (get tags tag-id)]
     (if (and tag (re-find (re-pattern tag) line))
       (if (string/starts-with? line tag)
-        {:part1 nil :tag-id tag-id :part2 (subs line (count tag))}
+        {:part1 nil :tag tag :part2 (subs line (count tag))}
         (let [[part1 part2] (string/split line (re-pattern tag))]
-          {:part1 part1 :tag-id tag-id :part2 part2}))
-      {:part1 line :tag-id nil :part2 nil})))
+          {:part1 part1 :tag tag :part2 part2}))
+      {:part1 line :tag nil :part2 nil})))
 
 (defn poems-struct-v [poems-from-file]
   (let [tags (apply merge

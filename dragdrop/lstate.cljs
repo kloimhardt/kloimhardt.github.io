@@ -36,7 +36,7 @@
 
 (defn get-tag-ids []
   (filter identity
-          (map (fn [[_id l]] (:tag-id l))
+          (map (fn [[id l]] (when (:tag l) id))
                         (get-in @l-state [:poems-struct :lines]))))
 
 (defn get-tag-height []
