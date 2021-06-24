@@ -98,17 +98,18 @@
                         :fill fill-color}]))))
         line-ids)])
 
-(defn get-tag-or-blank [id {:keys [lines blank-chars]}]
-  (if (= id :blank)
-    blank-chars
-    (get-in lines [id :tag])))
+(defn get-momentary-tag [line-id tag-ids {:keys [lines blank-chars]}]
+  (if-let [tag-id (get-in tag-ids [line-id :tag-id])]
+    (if (= tag-id :blank)
+      blank-chars
+      (get-in lines [tag-id :tag]))
+    (get-in lines [line-id :tag])))
 
 (defn plot-poem [line-ids tag-ids {:keys [lines line-height line-distance] :as params}]
   (let [psize (* line-height line-distance)]
     [:<>
      (map-indexed (fn [idx line-id]
-                    (let [tag-id (get-in tag-ids [line-id :tag-id])
-                          tag (get-tag-or-blank tag-id params)
+                    (let [tag (get-momentary-tag line-id tag-ids params)
                           {:keys [part1 part2]} (get lines line-id)
                           str-line (str part1 tag part2)]
                       ^{:key line-id}

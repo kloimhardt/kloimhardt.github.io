@@ -12,9 +12,8 @@
         (->> poems
              string/split-lines
              (map #(string/split % #";;")))]
-    [{:lines (->> vect (map first) (map string/trim))
-      :tags (->> vect (map fnext) (map trim-nil))
-      :ids (range (count vect))}]))
+    {:lines (->> vect (map first) (map string/trim))
+     :tags (->> vect (map fnext) (map trim-nil))}))
 
 (defn split-line [line tag]
   (if (and tag (re-find (re-pattern tag) line))
@@ -25,9 +24,10 @@
     {:part1 line :tag nil :part2 nil}))
 
 (defn poems-struct [poems-from-file]
-  (let [{:keys [lines tags]} (first poems-from-file)]
+  (let [{:keys [lines tags]} poems-from-file]
     {:poems [{:id 0 :line-ids (range (count lines))}]
-     :lines (into {} (map (fn[idx line tag] [idx (split-line line tag)]) (range) lines tags))}))
+     :lines (into {} (map (fn[idx line tag] [idx (split-line line tag)])
+                          (range) lines tags))}))
 
 (defn prepare-poems [plain-text]
   (lst/set-poem-struct (poems-struct (read-poems plain-text)))
@@ -35,6 +35,6 @@
 
 (defn get-file [filename handler]
   (GET filename
-    {:format :text
-     :headers {"Accept" "application/text"}
-     :handler handler}))
+       {:format :text
+        :headers {"Accept" "application/text"}
+        :handler handler}))
