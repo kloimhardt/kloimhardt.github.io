@@ -105,7 +105,6 @@
       (get-in lines [tag-id :tag]))
     (get-in lines [line-id :tag])))
 
-
 (defn plot-poem [line-ids tag-ids {:keys [lines line-height line-distance] :as params}]
   (let [psize (* line-height line-distance)]
     [:<>
@@ -131,7 +130,10 @@
             :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
     [plot-poem line-ids tag-ids params]
     [plot-figs line-ids tag-ids tag-rects params]
-    [plot-tags line-ids tag-positions params]]])
+    [plot-tags
+     line-ids
+     ;;(map key (filter (fn [[_id {:keys [tag-id]}]] (= tag-id :blank)) tag-ids))
+     tag-positions params]]])
 
 (defn main []
   (let [tag-ids (st/get-lines)
