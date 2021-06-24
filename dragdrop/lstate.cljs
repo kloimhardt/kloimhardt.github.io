@@ -1,7 +1,11 @@
 (ns lstate
   (:require [state :as st]))
 
-(def l-state (volatile! {:fill "#fafafa" :blank-chars "__"}))
+(def l-state (volatile! {:fill "#fafafa"
+                         :blank-chars "__"
+                         :line-height 20
+                         :line-distance 2
+                         :tag-height 50}))
 
 (defn set-poem-struct [pst]
   (vswap! l-state assoc :poems-struct pst))
@@ -34,3 +38,6 @@
   (filter identity
           (map (fn [[_id l]] (:tag-id l))
                         (get-in @l-state [:poems-struct :lines]))))
+
+(defn get-tag-height []
+  (:tag-height @l-state))
