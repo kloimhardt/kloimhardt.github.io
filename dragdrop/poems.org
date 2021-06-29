@@ -1,12 +1,19 @@
-* titel
+* art
+** titel
 line1
-lorem ipsum hicksi ;; ipsum
+lorem ipsum hicksi ;; lorem
 line3 holla hu ;; holla
 
-holla hu hi ;;hu
+ganz hu anders ;;hu
 in der stanza 2
 
-* titel2
-  neues poem ;; neues
+** titel2
+  neues poem ;; poem
 
   lluul stanza
+
+* filth
+** title 3
+   dies ist
+** titel 4
+   humpi
