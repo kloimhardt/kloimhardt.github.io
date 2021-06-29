@@ -1,5 +1,4 @@
-(ns lstate
-  (:require [state :as st]))
+(ns lstate)
 
 (def l-state (volatile! {:fill-color "#fafafa"
                          :blank-chars "__"
@@ -10,8 +9,7 @@
 (defn set-poem-struct [pst]
   (vswap! l-state assoc :lines (:lines pst) :poems (:poems pst)))
 
-(defn get-fill []
-  (:fill-color @l-state))
+
 
 (defn set-current-tag-id [id]
   (vswap! l-state assoc :current-id id))
@@ -27,9 +25,6 @@
 
 (defn set-tag [id tag-txt]
   (vswap! l-state assoc-in [:tags id] tag-txt))
-
-(defn get-blank-chars []
-  (:blank-chars @l-state))
 
 (defn get-tag-ids []
   (filter identity

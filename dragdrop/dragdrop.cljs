@@ -122,14 +122,14 @@
                           [:text {:x 10 :y (* psize (inc idx))
                                   :font-size line-height
                                   :ref (fn [el]
-                                         (when (and el tag)
+                                         (when (and el tag (not (st/get-tag-fig-rect tag)))
                                            (st/set-tag-fig-rect line-id
                                                                 (calc-tag-fig-rect el str-line tag))))}
                            str-line]))
                       line-ids)]))))
 
 (defn svg-canvas [& _]
-  (let [{:keys [fill-color]} @lst/l-state]
+  (let [{:keys [fill-color lines]} @lst/l-state]
     (fn
       [line-ids tag-ids tag-positions tag-rects]
       [:div
@@ -138,10 +138,7 @@
                 :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
         [plot-poem line-ids tag-ids]
         [plot-figs line-ids tag-ids tag-rects]
-        [plot-tags
-         line-ids
-         ;;(map key (filter (fn [[_id {:keys [tag-id]}]] (= tag-id :blank)) tag-ids))
-         tag-positions]]])))
+        [plot-tags (filter #(:tag (get lines %)) line-ids) tag-positions]]])))
 
 (defn main []
   (let [tag-ids (st/get-lines)
