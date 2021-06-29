@@ -28,14 +28,14 @@
   (when s (string/trim s)))
 
 (defn split-line [str-line]
-  (let [[line tag] (string/split str-line #";;")]
+  (let [[line tag] (map trim-nil (string/split str-line #";;"))]
     (if (and tag (re-find (re-pattern tag) line))
       (if (string/starts-with? line tag)
-        {:part1 nil :tag (string/trim tag) :part2 (subs line (inc (count tag)))}
+        {:part1 nil :tag tag :part2 (subs line (inc (count tag)))}
         (let [[part1 part2] (string/split line (re-pattern tag))]
-          {:part1 (string/trim part1) :tag (string/trim tag)
-           :part2 (string/trim part2)}))
-      {:part1 (string/trim line) :tag nil :part2 nil})))
+          {:part1 (string/trim part1) :tag tag
+           :part2 (trim-nil part2)}))
+      {:part1 line :tag nil :part2 nil})))
 
 (defn lines [raw-poems]
   (map (fn [[id str-line]]
@@ -98,7 +98,6 @@
   (.log js/console @lst/l-state)
   (.log js/console "rst5")
   (.log js/console @st/r-state)
-  (.log js/console "rst1")
-  )
+  (.log js/console "rst1"))
 
 (js/setTimeout print-states 300)
