@@ -3,5 +3,10 @@ line1
 lorem ipsum hicksi ;; ipsum
 line3 holla hu ;; holla
 
-stanta2
 holla hu hi ;;hu
+in der stanza 2
+
+* titel2
+  neues poem ;; neues
+
+  lluul stanza
