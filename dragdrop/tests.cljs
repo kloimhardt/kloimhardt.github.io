@@ -13,8 +13,10 @@
   (.log js/console "rst1")
   )
 
-(rp/get-file "poems.txt" rp/prepare-poems)
+(defn handler [plain-text]
+  (rp/prepare-poems plain-text)
+  (dom/render [d/main] (.getElementById js/document "content")))
 
-(dom/render [d/main] (.getElementById js/document "content"))
+(rp/get-file "poems.txt" handler)
 
 (js/setTimeout print-states 300)

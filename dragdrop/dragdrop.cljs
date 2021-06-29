@@ -74,29 +74,33 @@
                      (.-bottom client-rect)]]
     blank-rect))
 
-(defn plot-tags [line-ids tag-positions {:keys [lines tag-height]}]
-  [:<>
-   (map-indexed (fn [idx line-id]
-                  (when-let [tag (get-in lines [line-id :tag])]
-                    (if-let [pos (get-in tag-positions [line-id :pos])]
-                      ^{:key line-id}
-                      [:text {:x (first pos) :y (last pos) :ref (fn [el] (when el (make-draggable el line-id)))
-                              :style {:cursor :move} :font-size tag-height}
-                       tag]
-                      (st/set-tag-pos line-id (+ 10 (* 100 idx)) 200))))
-                line-ids)])
+(defn plot-tags [& _]
+  (let [{:keys [lines tag-height]} @lst/l-state]
+    (fn [line-ids tag-positions]
+      [:<>
+       (map-indexed (fn [idx line-id]
+                      (when-let [tag (get-in lines [line-id :tag])]
+                        (if-let [pos (get-in tag-positions [line-id :pos])]
+                          ^{:key line-id}
+                          [:text {:x (first pos) :y (last pos) :ref (fn [el] (when el (make-draggable el line-id)))
+                                  :style {:cursor :move} :font-size tag-height}
+                           tag]
+                          (st/set-tag-pos line-id (+ 10 (* 100 idx)) 200))))
+                    line-ids)])))
 
-(defn plot-figs [line-ids tags-for-lines reactive-tag-rects {:keys [fill-color]}]
-  [:<>
-   (map (fn [id]
-          (let [tag-id (get-in tags-for-lines [id :tag-id])]
-            (when (= tag-id :blank)
-              (let [[x-start x-end top bottom] (get reactive-tag-rects id)]
-                ^{:key [id]}
-                [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
-                        :height (inc (- bottom top))
-                        :fill fill-color}]))))
-        line-ids)])
+(defn plot-figs [& _]
+  (let [{:keys [fill-color]} @lst/l-state]
+    (fn [line-ids tags-for-lines reactive-tag-rects]
+      [:<>
+       (map (fn [id]
+              (let [tag-id (get-in tags-for-lines [id :tag-id])]
+                (when (= tag-id :blank)
+                  (let [[x-start x-end top bottom] (get reactive-tag-rects id)]
+                    ^{:key [id]}
+                    [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
+                            :height (inc (- bottom top))
+                            :fill fill-color}]))))
+            line-ids)])))
 
 (defn get-momentary-tag [line-id tag-ids {:keys [lines blank-chars]}]
   (if-let [tag-id (get-in tag-ids [line-id :tag-id])]
@@ -105,46 +109,43 @@
       (get-in lines [tag-id :tag]))
     (get-in lines [line-id :tag])))
 
-(defn plot-poem [line-ids tag-ids {:keys [lines line-height line-distance] :as params}]
-  (let [psize (* line-height line-distance)]
-    [:<>
-     (map-indexed (fn [idx line-id]
-                    (let [tag (get-momentary-tag line-id tag-ids params)
-                          {:keys [part1 part2]} (get lines line-id)
-                          str-line (str part1 tag part2)]
-                      ^{:key line-id}
-                      [:text {:x 10 :y (* psize (inc idx))
-                              :font-size line-height
-                              :ref (fn [el]
-                                     (when (and el tag)
-                                       (st/set-tag-fig-rect line-id
-                                                            (calc-tag-fig-rect el str-line tag))))}
-                       str-line]))
-                  line-ids)]))
+(defn plot-poem [& _]
+  (let [{:keys [lines line-height line-distance] :as params} @lst/l-state]
+    (fn [line-ids tag-ids]
+      (let [psize (* line-height line-distance)]
+        [:<>
+         (map-indexed (fn [idx line-id]
+                        (let [tag (get-momentary-tag line-id tag-ids params)
+                              {:keys [part1 part2]} (get lines line-id)
+                              str-line (str part1 tag part2)]
+                          ^{:key line-id}
+                          [:text {:x 10 :y (* psize (inc idx))
+                                  :font-size line-height
+                                  :ref (fn [el]
+                                         (when (and el tag)
+                                           (st/set-tag-fig-rect line-id
+                                                                (calc-tag-fig-rect el str-line tag))))}
+                           str-line]))
+                      line-ids)]))))
 
-(defn svg-canvas
-  [line-ids tag-ids tag-positions tag-rects {:keys [fill-color] :as params}]
-  [:div
-   [:svg {:width "100%" :height "70%"}
-    [:rect {:x 0, :y 0, :width "100%", :height "100%"
-            :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
-    [plot-poem line-ids tag-ids params]
-    [plot-figs line-ids tag-ids tag-rects params]
-    [plot-tags
-     line-ids
-     ;;(map key (filter (fn [[_id {:keys [tag-id]}]] (= tag-id :blank)) tag-ids))
-     tag-positions params]]])
+(defn svg-canvas [& _]
+  (let [{:keys [fill-color]} @lst/l-state]
+    (fn
+      [line-ids tag-ids tag-positions tag-rects]
+      [:div
+       [:svg {:width "100%" :height "70%"}
+        [:rect {:x 0, :y 0, :width "100%", :height "100%"
+                :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
+        [plot-poem line-ids tag-ids]
+        [plot-figs line-ids tag-ids tag-rects]
+        [plot-tags
+         line-ids
+         ;;(map key (filter (fn [[_id {:keys [tag-id]}]] (= tag-id :blank)) tag-ids))
+         tag-positions]]])))
 
 (defn main []
   (let [tag-ids (st/get-lines)
         tag-positions (st/get-ui-tags)
         tag-rects (st/get-tag-fig-rects)
-        poems-struct (lst/get-poems-struct)
-        {:keys [line-ids]} (first (:poems poems-struct))]
-    [svg-canvas line-ids tag-ids tag-positions tag-rects
-     {:lines (:lines poems-struct)
-      :fill-color (lst/get-fill)
-      :blank-chars (lst/get-blank-chars)
-      :line-height (:line-height @lst/l-state)
-      :line-distance (:line-distance @lst/l-state)
-      :tag-height (lst/get-tag-height)}]))
+        {:keys [line-ids]} (first (:poems @lst/l-state))]
+    [svg-canvas line-ids tag-ids tag-positions tag-rects]))

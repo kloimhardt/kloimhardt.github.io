@@ -1,20 +1,17 @@
 (ns lstate
   (:require [state :as st]))
 
-(def l-state (volatile! {:fill "#fafafa"
+(def l-state (volatile! {:fill-color "#fafafa"
                          :blank-chars "__"
                          :line-height 20
                          :line-distance 2
                          :tag-height 50}))
 
 (defn set-poem-struct [pst]
-  (vswap! l-state assoc :poems-struct pst))
-
-(defn get-poems-struct []
-  (get @l-state :poems-struct))
+  (vswap! l-state assoc :lines (:lines pst) :poems (:poems pst)))
 
 (defn get-fill []
-  (:fill @l-state))
+  (:fill-color @l-state))
 
 (defn set-current-tag-id [id]
   (vswap! l-state assoc :current-id id))
@@ -29,7 +26,7 @@
   (get @l-state :offset))
 
 (defn set-tag [id tag-txt]
-  (vswap! l-state assoc-in [:poems-struct :tags id] tag-txt))
+  (vswap! l-state assoc-in [:tags id] tag-txt))
 
 (defn get-blank-chars []
   (:blank-chars @l-state))
@@ -37,7 +34,7 @@
 (defn get-tag-ids []
   (filter identity
           (map (fn [[id l]] (when (:tag l) id))
-                        (get-in @l-state [:poems-struct :lines]))))
+                        (get-in @l-state [:lines]))))
 
 (defn get-tag-height []
   (:tag-height @l-state))
