@@ -3,11 +3,8 @@
 
 (def r-state (r/atom {}))
 
-(defn get-ui-tags []
-  (get-in @r-state [:ui :tags]))
-
 (defn get-verse-tags []
-    (get-in @r-state [:poem-data :tags]))
+  (get-in @r-state [:poem-data :tags]))
 
 (defn set-line-tag-id [line-id tag-id]
   (swap! r-state
@@ -20,10 +17,8 @@
 (defn get-lines-for-tag-id [tag-id]
   (map first (filter (fn [[_ line]] (= line tag-id)) (get-verse-tags))))
 
-(defn set-blank-tags [line-ids]
-  (swap! r-state
-         assoc-in [:poems-struct :lines] (into {} (map (fn [id] {id {:tag-id :blank}})
-                                                        line-ids))))
+(defn get-ui-tags []
+  (get-in @r-state [:ui :tags]))
 
 (defn set-tag-pos [id x y]
   (swap! r-state assoc-in [:ui :tags id :pos] [x y]))

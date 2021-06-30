@@ -79,14 +79,13 @@
     (fn [line-ids tag-positions]
       [:<>
        (map-indexed (fn [idx line-id]
-                      (when-let [tag (get-in lines [line-id :tag])]
-                        (if-let [pos (get-in tag-positions [line-id :pos])]
-                          ^{:key line-id}
-                          [:text {:x (first pos) :y (last pos) :ref (fn [el] (when el (make-draggable el line-id)))
-                                  :style {:cursor :move} :font-size tag-height}
-                           tag]
-                          (st/set-tag-pos line-id (+ 10 (* 100 idx)) 200))))
-                    line-ids)])))
+                      (if-let [pos (get-in tag-positions [line-id :pos])]
+                        ^{:key line-id}
+                        [:text {:x (first pos) :y (last pos) :ref (fn [el] (when el (make-draggable el line-id)))
+                                :style {:cursor :move} :font-size tag-height}
+                         (get-in lines [line-id :tag])]
+                        (st/set-tag-pos line-id (+ 10 (* 100 idx)) 200)))
+                     (lst/filter-lines-with-tags line-ids))])))
 
 (defn plot-figs [& _]
   (let [{:keys [fill-color]} @lst/l-state]

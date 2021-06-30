@@ -6,9 +6,6 @@
                          :line-distance 2
                          :tag-height 50}))
 
-(defn set-poem-struct [pst]
-  (vswap! l-state assoc :lines (:lines pst) :poems (:poems pst)))
-
 (defn set-current-tag-id [id]
   (vswap! l-state assoc :current-id id))
 
@@ -21,14 +18,6 @@
 (defn get-current-tag-offset []
   (get @l-state :offset))
 
-(defn set-tag [id tag-txt]
-  (vswap! l-state assoc-in [:tags id] tag-txt))
-
-(defn get-tag-ids []
-  (filter identity
-          (map (fn [[id l]] (when (:tag l) id))
-                        (get-in @l-state [:lines]))))
-
 (defn get-tag-height []
   (:tag-height @l-state))
 
@@ -36,8 +25,8 @@
   (vswap! l-state assoc :verse-lengths verse-lengths :lines lines))
 
 (defn get-lines-for-verse [category poem verse]
-  (map (fn [line-idx] [category poem verse line-idx]) (range (get-in (:verse-lengths @l-state) [category poem verse]))))
+  (map (fn [line-idx] [category poem verse line-idx])
+       (range (get-in (:verse-lengths @l-state) [category poem verse]))))
 
-(defn filter-lines-for-tags [line-ids]
-  (filter identity
-          (map (fn [id] (when (:tag (get (:lines @l-state) id)) id)) line-ids)))
+(defn filter-lines-with-tags [line-ids]
+  (filter #(:tag (get (:lines @l-state) %)) line-ids))
