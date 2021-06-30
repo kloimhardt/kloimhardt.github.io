@@ -6,19 +6,34 @@
 (defn get-ui-tags []
   (get-in @r-state [:ui :tags]))
 
-(defn get-lines []
+#_(defn get-lines []
   (get-in @r-state [:poems-struct :lines]))
 
-(defn set-line-tag-id [line-id tag-id]
+(defn get-lines []
+    (get-in @r-state [:poem-data :tags]))
+
+
+#_(defn set-line-tag-id [line-id tag-id]
   (swap! r-state
          (fn [state]
            (assoc-in state [:poems-struct :lines line-id :tag-id] tag-id))))
 
-(defn get-line-tag-id [line-id]
+(defn set-line-tag-id [line-id tag-id]
+  (swap! r-state
+         (fn [state]
+           (assoc-in state [:poem-data :tags line-id] tag-id))))
+
+#_(defn get-line-tag-id [line-id]
   (get-in @r-state [:poems-struct :lines line-id :tag-id]))
 
-(defn get-lines-for-tag-id [tag-id]
+(defn get-line-tag-id [line-id]
+  (get-in @r-state [:poem-data :tags line-id]))
+
+#_(defn get-lines-for-tag-id [tag-id]
   (map first (filter (fn [[_ line]] (= (:tag-id line) tag-id)) (get-lines))))
+
+(defn get-lines-for-tag-id [tag-id]
+  (map first (filter (fn [[_ line]] (= line tag-id)) (get-lines))))
 
 (defn set-blank-tags [line-ids]
   (swap! r-state

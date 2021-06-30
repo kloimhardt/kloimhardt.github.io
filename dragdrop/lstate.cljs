@@ -33,7 +33,11 @@
   (:tag-height @l-state))
 
 (defn set-verse-lengths-and-lines [verse-lengths lines]
-  (vswap! l-state assoc :verse-lengths verse-lengths :lines1 lines))
+  (vswap! l-state assoc :verse-lengths verse-lengths :lines lines))
 
 (defn get-lines-for-verse [category poem verse]
   (map (fn [line-idx] [category poem verse line-idx]) (range (get-in (:verse-lengths @l-state) [category poem verse]))))
+
+(defn filter-lines-for-tags [line-ids]
+  (filter identity
+          (map (fn [id] (when (:tag (get (:lines @l-state) id)) id)) line-ids)))
