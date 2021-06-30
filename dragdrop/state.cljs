@@ -29,9 +29,6 @@
 (defn set-tag-fig-rect [id rect]
   (swap! r-state assoc-in [:ui :lines id :fig-rect] rect))
 
-(defn get-tag-fig-rect [id]
-  (get-in @r-state [:ui :lines id :fig-rect]))
-
 (defn get-tag-fig-rects []
   (into {} (map (fn [[id r]] [id (:fig-rect r)]) (get-in @r-state [:ui :lines]))))
 
