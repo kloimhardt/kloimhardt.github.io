@@ -34,3 +34,7 @@
 
 (defn get-tag-fig-rects []
   (into {} (map (fn [[id r]] [id (:fig-rect r)]) (get-in @r-state [:ui :lines]))))
+
+(defn set-tag-to-blank-for-lines [line-ids]
+  (let [new-blank-lines (into {} (map (fn[id] [id :blank]) line-ids))]
+    (swap! r-state assoc-in [:poem-data :tags] new-blank-lines)))

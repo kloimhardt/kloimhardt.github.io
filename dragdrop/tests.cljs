@@ -7,13 +7,8 @@
             [clojure.string :as string]))
 
 (defn hu [plain-text]
-  (let [raw (second (rp/read-poems plain-text))
-        lines (into {} (rp/lines raw))
-        verse-lengths (rp/verse-lengths raw)]
-    (lst/set-verse-lengths-and-lines verse-lengths lines)
-    (let [lines-with-tags (lst/filter-lines-with-tags (lst/get-lines-for-verse 0 0 0))]
-      (swap! st/r-state assoc-in [:poem-data :tags] (into {} (map (fn[id] [id :blank]) lines-with-tags))))
-    (dom/render [d/main] (.getElementById js/document "content"))))
+  (lst/set-lines-and-verse-lengths (rp/get-lines-and-verse-lengths plain-text))
+  (dom/render [d/main] (.getElementById js/document "content")))
 
 (rp/get-file "poems.org" hu)
 

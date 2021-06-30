@@ -1,8 +1,6 @@
 (ns readpoem
   (:require [clojure.string :as string]
-            [ajax.core :refer [GET]]
-            [state :as st]
-            [lstate :as lst]))
+            [ajax.core :refer [GET]]))
 
 (defn read-poems [plain-text]
   (->> plain-text
@@ -83,3 +81,9 @@
        {:format :text
         :headers {"Accept" "application/text"}
         :handler handler}))
+
+(defn get-lines-and-verse-lengths [plain-text]
+  (let [raw (second (read-poems plain-text))
+        lines (into {} (lines raw))
+        verse-lengths (verse-lengths raw)]
+    {:lines lines :verse-lengths verse-lengths}))

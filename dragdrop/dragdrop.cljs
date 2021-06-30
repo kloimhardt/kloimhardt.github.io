@@ -137,13 +137,14 @@
                 :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
         [plot-poem line-ids tag-ids]
         [plot-figs line-ids tag-ids tag-rects]
-        [plot-tags (filter #(:tag (get lines %)) line-ids) tag-positions]
-        ]
-       [:p (str @st/r-state)]])))
+        [plot-tags (keys tag-ids) tag-positions]]])))
 
 (defn main []
-  (let [tag-ids (st/get-verse-tags)
-        tag-positions (st/get-ui-tags)
-        tag-rects (st/get-tag-fig-rects)
-        line-ids (lst/get-lines-for-verse 0 0 0)]
-    [svg-canvas line-ids tag-ids tag-positions tag-rects]))
+  (let [line-ids (lst/get-lines-for-verse 0 0 1)
+        active-lines (lst/filter-lines-with-tags line-ids)]
+    (st/set-tag-to-blank-for-lines active-lines)
+    (fn []
+      (let [tag-ids (st/get-verse-tags)
+            tag-positions (st/get-ui-tags)
+            tag-rects (st/get-tag-fig-rects)]
+        [svg-canvas line-ids tag-ids tag-positions tag-rects]))))

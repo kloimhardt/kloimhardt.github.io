@@ -21,7 +21,7 @@
 (defn get-tag-height []
   (:tag-height @l-state))
 
-(defn set-verse-lengths-and-lines [verse-lengths lines]
+(defn set-lines-and-verse-lengths [{:keys [verse-lengths lines]}]
   (vswap! l-state assoc :verse-lengths verse-lengths :lines lines))
 
 (defn get-lines-for-verse [category poem verse]
