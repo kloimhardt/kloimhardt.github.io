@@ -1,9 +1,12 @@
+/*
 html, body {
     margin: 0;
     height: 100%;
+    width: 100%;
     overflow: hidden;
-    position: fixed
+    position: fixed;
 }
+*/
 
 svg text {
     -webkit-touch-callout: none;
