@@ -144,5 +144,6 @@
   (let [tag-ids (st/get-lines)
         tag-positions (st/get-ui-tags)
         tag-rects (st/get-tag-fig-rects)
-        {:keys [line-ids]} (first (:poems @lst/l-state))]
+        {:keys [line-ids]} (first (:poems @lst/l-state))
+        line-ids1 (lst/get-lines-for-verse 0 0 0)]
     [svg-canvas line-ids tag-ids tag-positions tag-rects]))

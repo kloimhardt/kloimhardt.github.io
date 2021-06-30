@@ -9,8 +9,6 @@
 (defn set-poem-struct [pst]
   (vswap! l-state assoc :lines (:lines pst) :poems (:poems pst)))
 
-
-
 (defn set-current-tag-id [id]
   (vswap! l-state assoc :current-id id))
 
@@ -33,3 +31,9 @@
 
 (defn get-tag-height []
   (:tag-height @l-state))
+
+(defn set-verse-lengths-and-lines [verse-lengths lines]
+  (vswap! l-state assoc :verse-lengths verse-lengths :lines1 lines))
+
+(defn get-lines-for-verse [category poem verse]
+  (map (fn [line-idx] [category poem verse line-idx]) (range (get-in (:verse-lengths @l-state) [category poem verse]))))
