@@ -1,4 +1,0 @@
-line1
-first 2 3 ;; first
-lorem ipsum hicksi ;; ipsum
-line3 holla hu ;; hu

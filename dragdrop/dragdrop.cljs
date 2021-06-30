@@ -29,7 +29,7 @@
   (when (every? true?
                 (map (fn [[line-id {:keys [tag-id]}]]
                        (or (nil? tag-id) (= line-id tag-id)))
-                     (st/get-lines)))
+                     (st/get-verse-tags)))
     (println "good")))
 
 (defn drag [e]
@@ -143,9 +143,8 @@
        [:p (str @st/r-state)]])))
 
 (defn main []
-  (let [tag-ids (st/get-lines)
+  (let [tag-ids (st/get-verse-tags)
         tag-positions (st/get-ui-tags)
         tag-rects (st/get-tag-fig-rects)
-        ;;{:keys [line-ids]} (first (:poems @lst/l-state))
         line-ids (lst/get-lines-for-verse 0 0 0)]
     [svg-canvas line-ids tag-ids tag-positions tag-rects]))
