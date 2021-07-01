@@ -4,6 +4,13 @@
   (:require [state :as st]
             [lstate :as lst]
             [clojure.string :as string]))
+(defn ps [x]
+  (println x)
+  x)
+
+(defn p [x]
+  (.log js/console x)
+  x)
 
 (defn get-mouse-positon [e]
   (let [evt (if-let [t (.-touches e)] (first t) e)]
@@ -68,10 +75,10 @@
         [start end]  [(.getStartPositionOfChar el idx1)
                       (.getEndPositionOfChar el idx2)]
         client-rect  (first (.getClientRects el))
-        blank-rect  [(.-x start)
-                     (.-x end)
-                     (.-top client-rect)
-                     (.-bottom client-rect)]]
+        blank-rect  (map int [(.-x start)
+                              (.-x end)
+                              (.-top client-rect)
+                              (.-bottom client-rect)])]
     blank-rect))
 
 (defn plot-tags [& _]
@@ -98,7 +105,8 @@
                     ^{:key [id]}
                     [:rect {:x (dec x-start) :y (inc top) :width (inc (- x-end x-start))
                             :height (inc (- bottom top))
-                            :fill fill-color}]))))
+                            ;;:fill fill-color
+                            }]))))
             line-ids)])))
 
 (defn get-momentary-tag [line-id tag-ids {:keys [lines blank-chars]}]
@@ -116,14 +124,19 @@
          (map-indexed (fn [idx line-id]
                         (let [tag (get-momentary-tag line-id tag-ids params)
                               {:keys [part1 part2]} (get lines line-id)
-                              str-line (str part1 (when part1 " ") tag " " part2)]
+                              str-line (str part1 (when part1 " ") tag " " part2)
+                              x 10
+                              y (* psize (inc idx))]
                           ^{:key line-id}
-                          [:text {:x 10 :y (* psize (inc idx))
+                          [:text {:x x :y y
                                   :font-size line-height
                                   :ref (fn [el]
                                          (when (and el tag)
+                                           (ps [x (+ x 10) (- y line-height) y])
                                            (st/set-tag-fig-rect line-id
-                                                                (calc-tag-fig-rect el str-line tag))))}
+                                                                [x (+ x 10) (- y line-height) y]
+                                                                ;;(ps (calc-tag-fig-rect el str-line tag))
+                                                                )))}
                            str-line]))
                       line-ids)]))))
 
@@ -131,13 +144,12 @@
   (let [{:keys [fill-color]} @lst/l-state]
     (fn
       [line-ids tag-ids tag-positions tag-rects]
-      [:div
-       [:svg {:width "100%" :height "70%"}
-        [:rect {:x 0, :y 0, :width "100%", :height "100%"
-                :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
-        [plot-poem line-ids tag-ids]
-        [plot-figs line-ids tag-ids tag-rects]
-        [plot-tags (keys tag-ids) tag-positions]]])))
+      [:svg {:width "100%" :height "70%"}
+       [:rect {:x 0, :y 0, :width "100%", :height "100%"
+               :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
+       [plot-poem line-ids tag-ids]
+       [plot-figs line-ids tag-ids tag-rects]
+       [plot-tags (keys tag-ids) tag-positions]])))
 
 (defn main []
   (let [line-ids (lst/get-lines-for-verse 0 0 0)
@@ -147,4 +159,6 @@
       (let [tag-ids (st/get-verse-tags)
             tag-positions (st/get-ui-tags)
             tag-rects (st/get-tag-fig-rects)]
-        [svg-canvas line-ids tag-ids tag-positions tag-rects]))))
+        [:div
+         [:button.button "hu"]
+         [svg-canvas line-ids tag-ids tag-positions tag-rects]]))))
