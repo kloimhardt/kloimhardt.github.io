@@ -35,3 +35,9 @@
 (defn set-tag-to-blank-for-lines [line-ids]
   (let [new-blank-lines (into {} (map (fn[id] [id :blank]) line-ids))]
     (swap! r-state assoc-in [:poem-data :tags] new-blank-lines)))
+
+(defn set-category [category]
+  (swap! r-state assoc-in [:ui :category] category))
+
+(defn set-verse [idx-vec]
+  (swap! r-state assoc-in [:ui :verse] idx-vec))
