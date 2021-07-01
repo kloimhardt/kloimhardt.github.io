@@ -125,6 +125,13 @@
        [plot-poem line-ids tag-ids]
        [plot-tags (keys tag-ids) tag-positions]])))
 
+(defn go-to-verse [verse-vec]
+  (st/set-verse verse-vec)
+  (let [line-ids (lst/get-lines-for-verse verse-vec)
+        active-lines (lst/filter-lines-with-tags line-ids)]
+    (ps line-ids)
+    (st/set-tag-to-blank-for-lines active-lines)))
+
 (defn main2 [& _]
   (let [nof-categories (count (:verse-lengths @lst/l-state))]
     (fn [tag-ids tag-positions ui-category current-verse]
@@ -135,11 +142,12 @@
            [:div
             [:button.button {:on-click #(st/set-category nil)} "back"]
             (map-indexed (fn [p-idx _]
-                           ^{:key p-idx}[:p
-                                         [:a {:on-click #(do (st/set-verse [ui-category p-idx 0])
-                                                             (st/set-category nil))}
-                                             (lst/get-poem-title ui-category p-idx)]])
-              (get (:verse-lengths @lst/l-state) ui-category))]
+                           ^{:key p-idx}
+                           [:p
+                            [:a {:on-click #(do (go-to-verse [ui-category p-idx 0])
+                                                (st/set-category nil))}
+                             (lst/get-poem-title ui-category p-idx)]])
+                         (get (:verse-lengths @lst/l-state) ui-category))]
            [:div
             (map
               (fn [category-idx] ^{:key category-idx} [:button.button {:on-click #(st/set-category category-idx)}
@@ -149,14 +157,11 @@
          [:p (str @st/r-state)]]))))
 
 (defn main []
-  (st/set-verse [0 0 0])
-  (let [current-verse (get-in @st/r-state [:ui :verse])
-        line-ids (lst/get-lines-for-verse current-verse)
-        active-lines (lst/filter-lines-with-tags line-ids)]
-    (st/set-tag-to-blank-for-lines active-lines)
-    (fn []
-      (pc "main")
-      (let [tag-ids (st/get-verse-tags)
-            tag-positions (st/get-ui-tags)
-            ui-category (get-in @st/r-state [:ui :category])]
-        [main2 tag-ids tag-positions ui-category current-verse]))))
+  (go-to-verse [0 0 0])
+  (fn []
+    (pc "main")
+    (let [tag-ids (st/get-verse-tags)
+          tag-positions (st/get-ui-tags)
+          ui-category (get-in @st/r-state [:ui :category])
+          current-verse (get-in @st/r-state [:ui :verse])]
+      [main2 tag-ids tag-positions ui-category current-verse])))
