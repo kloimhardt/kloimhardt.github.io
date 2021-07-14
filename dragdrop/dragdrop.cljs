@@ -73,40 +73,12 @@
     (.addEventListener "touchstart" (start-drag id))
     dragarea))
 
-(defn plot-tags [& _]
-  (let [{:keys [lines tag-height]} @lst/l-state]
-    (fn [line-ids tag-positions]
-      (pc "plot-tags")
-      [:<>
-       (map (fn [line-id]
-              (let [pos (get-in tag-positions [line-id :pos])]
-                ^{:key line-id}
-                [:text {:x (first pos) :y (last pos) :ref (fn [el] (when el (make-draggable el line-id)))
-                        :style {:cursor :move} :font-size tag-height}
-                 (get-in lines [line-id :tag])]))
-            line-ids)])))
-
 (defn get-momentary-tag [line-id tag-ids {:keys [lines blank-chars]}]
   (if-let [tag-id (get tag-ids line-id)]
     (if (= tag-id :blank)
       blank-chars
       (get-in lines [tag-id :tag]))
     (get-in lines [line-id :tag])))
-
-(defn plot-poem [& _]
-  (let [{:keys [lines line-height] :as params} @lst/l-state]
-    (fn [line-ids tag-ids]
-      (pc "plot-poem")
-      [:<>
-       (map (fn [line-id]
-              (let [[x _ _ y] (get-in @lst/ui-state [:fig-rects line-id])
-                    tag (get-momentary-tag line-id tag-ids params)
-                    {:keys [part1 part2]} (get lines line-id)
-                    str-line (str part1 (when part1 " ") tag " " part2)]
-                ^{:key line-id}
-                [:text {:x x :y y :font-size line-height}
-                 str-line]))
-            line-ids)])))
 
 (defn set-tag-fig-rects! [line-positions line-height]
   (run! (fn [[line-id [x y]]]
@@ -135,16 +107,6 @@
                     (get-in lines [tag-id :tag-sort-idx])))]])
           tag-ids)}))
 
-(defn svg-canvas [& _]
-  (let [{:keys [fill-color]} @lst/l-state]
-    (fn [line-ids tag-ids tag-positions]
-      (pc "svg-canvas")
-      [:svg {:width "100%" :height "90%"}
-       [:rect {:x 0, :y 0, :width "100%", :height "100%"
-               :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
-       [plot-poem line-ids tag-ids]
-       [plot-tags (keys tag-ids) tag-positions]])))
-
 (defn go-to-verse [verse-vec]
   (st/set-verse verse-vec)
   (let [line-ids (lst/get-lines-for-verse verse-vec)
@@ -153,39 +115,3 @@
     (st/set-tag-to-blank-for-lines tag-ids)
     (set-tag-fig-rects! line-positions (:line-height @lst/l-state))
     (set-tag-positions! tag-initial-positions)))
-
-(defn categories []
-  (let [nof-categories (count (:verse-lengths @lst/l-state))]
-    (fn []
-      (pc "categories")
-      [:<>
-       (map
-         (fn [category-idx] ^{:key category-idx} [:button.button {:on-click #(st/set-category category-idx)}
-                                                  (lst/get-category category-idx)])
-         (range nof-categories))])))
-
-(defn list-poems-for-category [ui-category]
-  [:<>
-   (map-indexed (fn [p-idx _]
-                  ^{:key p-idx}
-                  [:p
-                   [:a {:on-click #(do (go-to-verse [ui-category p-idx 0])
-                                       (st/set-category nil))}
-                    (lst/get-poem-title ui-category p-idx)]])
-                (get (:verse-lengths @lst/l-state) ui-category))])
-
-(defn main []
-  (go-to-verse [0 0 0])
-  (fn []
-    (pc "main")
-    [:div
-     (if-let [ui-category (get-in @st/r-state [:ui :category])]
-       [:<>
-        [:button.button {:on-click #(st/set-category nil)} "back"]
-        [list-poems-for-category ui-category]]
-       (let [current-verse (get-in @st/r-state [:ui :verse])
-             tag-ids (get-in @st/r-state [:poem-data :tags])
-             tag-positions (get-in @st/r-state [:ui :tags])]
-         [:<>
-          [categories]
-          [svg-canvas (lst/get-lines-for-verse current-verse) tag-ids tag-positions]]))]))

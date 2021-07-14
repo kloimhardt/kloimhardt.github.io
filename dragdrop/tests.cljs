@@ -1,10 +1,11 @@
 (ns tests
   (:require [state :as st]
             [lstate :as lst]
-            [dragdrop :as d]
+            [view :as d]
             [readpoem :as rp]
             [reagent.dom :as dom]
             [clojure.string :as string]))
+
 (defn ps [x]
   (println x)
   x)
