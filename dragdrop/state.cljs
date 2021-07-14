@@ -26,12 +26,6 @@
 (defn get-tag-pos [id]
   (get-in @r-state [:ui :tags id :pos]))
 
-(defn set-tag-fig-rect [id rect]
-  (swap! r-state assoc-in [:ui :lines id :fig-rect] rect))
-
-(defn get-tag-fig-rects []
-  (into {} (map (fn [[id r]] [id (:fig-rect r)]) (get-in @r-state [:ui :lines]))))
-
 (defn set-tag-to-blank-for-lines [line-ids]
   (let [new-blank-lines (into {} (map (fn[id] [id :blank]) line-ids))]
     (swap! r-state assoc-in [:poem-data :tags] new-blank-lines)))

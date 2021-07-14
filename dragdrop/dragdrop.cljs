@@ -32,7 +32,7 @@
   (lst/set-current-tag-id nil))
 
 (defn get-line-id-when-pos-in-fig [x y]
-  (->> (st/get-tag-fig-rects)
+  (->> (lst/get-tag-fig-rects)
        (map (fn [[id [x-start x-end top bottom]]]
               (when (and (or (true? x) (< x-start x x-end)) (< top y bottom)) id)))
        (some identity)))
@@ -113,7 +113,7 @@
 (defn set-tag-fig-rects! [line-ids line-positions line-height]
   (run! (fn [line-id]
           (let [[x y] (get line-positions line-id)]
-            (st/set-tag-fig-rect line-id [x (+ x 10) (- y line-height) y])))
+            (lst/set-tag-fig-rect line-id [x (+ x 10) (- y line-height) y])))
         line-ids))
 
 (defn all-positions [line-ids tag-ids]

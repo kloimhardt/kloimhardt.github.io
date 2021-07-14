@@ -1,13 +1,25 @@
 (ns lstate)
 
-(def config
-  {:fill-color "#fafafa"
-   :blank-chars "__"
-   :line-height 20
-   :line-distance 2
-   :tag-height 50
-   :tag-distance 1.2
-   :left-margin 10})
+
+(def ui-state (volatile! {}))
+
+(defn set-current-tag-id [id]
+  (vswap! ui-state assoc :current-id id))
+
+(defn get-current-tag-id []
+  (get @ui-state :current-id))
+
+(defn set-current-tag-offset [ox oy]
+  (vswap! ui-state assoc :offset [ox oy]))
+
+(defn get-current-tag-offset []
+  (get @ui-state :offset))
+
+(defn set-tag-fig-rect [id rect]
+  (vswap! ui-state assoc-in [:fig-rects id] rect))
+
+(defn get-tag-fig-rects []
+  (:fig-rects @ui-state))
 
 (def l-state (volatile! {:fill-color "#fafafa"
                          :blank-chars "__"
@@ -16,18 +28,6 @@
                          :tag-height 50
                          :tag-distance 1.2
                          :left-margin 10}))
-
-(defn set-current-tag-id [id]
-  (vswap! l-state assoc :current-id id))
-
-(defn get-current-tag-id []
-  (get @l-state :current-id))
-
-(defn set-current-tag-offset [ox oy]
-  (vswap! l-state assoc :offset [ox oy]))
-
-(defn get-current-tag-offset []
-  (get @l-state :offset))
 
 (defn get-tag-height []
   (:tag-height @l-state))
