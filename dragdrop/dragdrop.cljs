@@ -139,7 +139,7 @@
   (let [{:keys [fill-color]} @lst/l-state]
     (fn [line-ids tag-ids tag-positions]
       (pc "svg-canvas")
-      [:svg {:width "100%" :height "100%"}
+      [:svg {:width "100%" :height "90%"}
        [:rect {:x 0, :y 0, :width "100%", :height "100%"
                :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
        [plot-poem line-ids tag-ids]
