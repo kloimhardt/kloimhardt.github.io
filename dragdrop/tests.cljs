@@ -40,8 +40,9 @@
           (into {}))}))
 
 (defn print-states []
-  (.log js/console @lst/l-state)
-  (.log js/console @st/r-state)
+  (p @lst/l-state)
+  (p @lst/ui-state)
+  (p @st/r-state)
 
   (p
     (let [current-verse (get-in @st/r-state [:ui :verse])

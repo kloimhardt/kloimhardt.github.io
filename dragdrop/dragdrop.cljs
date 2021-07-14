@@ -136,12 +136,29 @@
                     (get-in lines [tag-id :tag-sort-idx])))]])
           (keys tag-ids))}))
 
+(defn all-positions2 [line-ids tag-ids]
+  (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin]} @lst/l-state
+        psize (* line-height line-distance)]
+    {:line-positions
+     (map-indexed (fn [idx line-id]
+                    [line-id
+                     [left-margin
+                      (* psize (inc idx))]])
+                  line-ids)
+     :tag-initial-positions
+     (map (fn [tag-id]
+            [tag-id
+             [left-margin
+              (+ (* psize (count line-ids))
+                 (* tag-height tag-distance
+                    (get-in lines [tag-id :tag-sort-idx])))]])
+           tag-ids)}))
+
 (defn svg-canvas [& _]
   (let [{:keys [fill-color line-height]} @lst/l-state]
     (fn [line-ids tag-ids tag-positions]
       (pc "svg-canvas")
       (let [{:keys [line-positions tag-initial-positions]} (all-positions line-ids tag-ids)]
-        (set-tag-fig-rects! line-positions line-height)
         [:svg {:width "100%" :height "70%"}
          [:rect {:x 0, :y 0, :width "100%", :height "100%"
                  :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
@@ -151,8 +168,14 @@
 (defn go-to-verse [verse-vec]
   (st/set-verse verse-vec)
   (let [line-ids (lst/get-lines-for-verse verse-vec)
-        active-lines (lst/filter-lines-with-tags line-ids)]
-    (st/set-tag-to-blank-for-lines active-lines)))
+        tag-ids (lst/filter-lines-with-tags line-ids)
+        {:keys [line-positions tag-initial-positions]} (all-positions2 line-ids tag-ids)]
+    (st/set-tag-to-blank-for-lines tag-ids)
+    (set-tag-fig-rects! line-positions (:line-height @lst/l-state))
+    (p "hu")
+    (ps line-positions)
+    (ps tag-initial-positions)
+    ))
 
 (defn main2 [& _]
   (let [nof-categories (count (:verse-lengths @lst/l-state))]
@@ -182,8 +205,8 @@
   (go-to-verse [0 0 0])
   (fn []
     (pc "main")
-    (let [tag-ids (st/get-verse-tags)
+    (let [current-verse (get-in @st/r-state [:ui :verse])
+          tag-ids (st/get-verse-tags)
           tag-positions (st/get-ui-tags)
-          ui-category (get-in @st/r-state [:ui :category])
-          current-verse (get-in @st/r-state [:ui :verse])]
+          ui-category (get-in @st/r-state [:ui :category])]
       [main2 tag-ids tag-positions ui-category current-verse])))
