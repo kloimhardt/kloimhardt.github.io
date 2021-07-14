@@ -114,15 +114,53 @@
                            str-line]))
                       line-ids)]))))
 
+(defn plot-poem2 [& _]
+  (let [{:keys [lines line-height] :as params} @lst/l-state]
+    (fn [line-ids tag-ids line-positions]
+      (pc "plot-poem")
+      [:<>
+       (map (fn [line-id]
+              (let [[x y] (get line-positions line-id)]
+                (st/set-tag-fig-rect line-id [x (+ x 10) (- y line-height) y])
+                (let [tag (get-momentary-tag line-id tag-ids params)
+                      {:keys [part1 part2]} (get lines line-id)
+                      str-line (str part1 (when part1 " ") tag " " part2)]
+                  ^{:key line-id}
+                  [:text {:x x :y y :font-size line-height}
+                   str-line])))
+            line-ids)])))
+
+(defn all-positions [line-ids tag-ids]
+  (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin]} @lst/l-state
+        psize (* line-height line-distance)]
+    {:line-positions
+     (->> line-ids
+          (map-indexed (fn [idx line-id]
+                         [line-id
+                          [left-margin
+                           (* psize (inc idx))]]))
+          (into {}))
+     :tag-initial-positions
+     (->> (keys tag-ids)
+          (map (fn [tag-id]
+                 [tag-id
+                  [left-margin
+                   (+ (* psize (count line-ids))
+                      (* tag-height tag-distance
+                         (get-in lines [tag-id :tag-sort-idx])))]]))
+          (into {}))}))
+
 (defn svg-canvas [& _]
   (let [{:keys [fill-color]} @lst/l-state]
     (fn [line-ids tag-ids tag-positions]
       (pc "svg-canvas")
-      [:svg {:width "100%" :height "70%"}
-       [:rect {:x 0, :y 0, :width "100%", :height "100%"
-               :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
-       [plot-poem line-ids tag-ids]
-       [plot-tags (keys tag-ids) tag-positions]])))
+      (let [{:keys [line-positions tag-initial-positions]} (all-positions line-ids tag-ids)]
+        [:svg {:width "100%" :height "70%"}
+         [:rect {:x 0, :y 0, :width "100%", :height "100%"
+                 :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
+         ;;[plot-poem line-ids tag-ids]
+         [plot-poem2 line-ids tag-ids line-positions]
+         [plot-tags (keys tag-ids) tag-positions]]))))
 
 (defn go-to-verse [verse-vec]
   (st/set-verse verse-vec)
