@@ -24,9 +24,6 @@
 (defn set-lines-and-verse-lengths [{:keys [verse-lengths lines]}]
   (vswap! l-state assoc :verse-lengths verse-lengths :lines lines))
 
-(defn filter-lines-with-tags [line-ids]
-  (filter #(:tag (get (:lines @l-state) %)) line-ids))
-
 (defn get-category [category-idx]
   (get-in (:lines @l-state) [[category-idx -1 0 -1] :part1]))
 

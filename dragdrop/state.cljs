@@ -31,4 +31,4 @@
   (swap! r-state assoc-in [:ui :category] category))
 
 (defn set-verse [idx-vec]
-  (swap! r-state assoc-in [:ui :verse] idx-vec))
+  (swap! r-state assoc-in [:poem-data :verse] idx-vec))

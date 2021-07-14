@@ -114,7 +114,7 @@
 (defn go-to-verse [verse-vec]
   (st/set-verse verse-vec)
   (let [line-ids (get-lines-for-verse lst/config verse-vec)
-        tag-ids (lst/filter-lines-with-tags line-ids)
+        tag-ids (filter #(:tag (get (:lines lst/config) %)) line-ids)
         {:keys [line-positions tag-initial-positions]} (all-positions line-ids tag-ids)]
     (st/set-tag-to-blank-for-lines tag-ids)
     (set-tag-fig-rects! line-positions (:line-height lst/config))
