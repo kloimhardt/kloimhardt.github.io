@@ -79,13 +79,13 @@
     (fn [line-ids tag-positions]
       (pc "plot-tags")
       [:<>
-       (map-indexed (fn [idx line-id]
+       (map (fn [line-id]
                       (if-let [pos (get-in tag-positions [line-id :pos])]
                         ^{:key line-id}
                         [:text {:x (first pos) :y (last pos) :ref (fn [el] (when el (make-draggable el line-id)))
                                 :style {:cursor :move} :font-size tag-height}
                          (get-in lines [line-id :tag])]
-                        (st/set-tag-pos line-id (+ 10 (* 100 idx)) 200)))
+                        (st/set-tag-pos line-id (+ 10 (* 100 (get-in lines [line-id :tag-sort-idx]))) 200)))
                     line-ids)])))
 
 (defn get-momentary-tag [line-id tag-ids {:keys [lines blank-chars]}]
@@ -116,8 +116,7 @@
 
 (defn svg-canvas [& _]
   (let [{:keys [fill-color]} @lst/l-state]
-    (fn
-      [line-ids tag-ids tag-positions]
+    (fn [line-ids tag-ids tag-positions]
       (pc "svg-canvas")
       [:svg {:width "100%" :height "70%"}
        [:rect {:x 0, :y 0, :width "100%", :height "100%"

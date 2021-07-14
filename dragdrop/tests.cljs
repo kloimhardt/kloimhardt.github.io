@@ -19,14 +19,34 @@
 
 (rp/get-file "poems.org" hu)
 
+(defn all-positions [line-ids tag-ids]
+  (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin]} @lst/l-state
+        psize (* line-height line-distance)]
+    {:line-positions
+     (->> line-ids
+          (map-indexed (fn [idx line-id]
+                         [line-id
+                          [left-margin
+                           (* psize (inc idx))]]))
+          (into {}))
+     :tag-initial-positions
+     (->> (keys tag-ids)
+          (map (fn [tag-id]
+                 [tag-id
+                  [left-margin
+                   (+ (* psize (count line-ids))
+                      (* tag-height tag-distance
+                         (get-in lines [tag-id :tag-sort-idx])))]]))
+          (into {}))}))
+
 (defn print-states []
   (.log js/console @lst/l-state)
   (.log js/console @st/r-state)
-  (ps (:verse-lengths @lst/l-state))
-  (ps (map-indexed
-        (fn [c-idx poems]
-          [(get-in (:lines @lst/l-state) [[c-idx -1 0 -1] :part1])
-           (map-indexed (fn [p-idx _] (lst/get-poem-title c-idx p-idx)) poems)])
-        (:verse-lengths @lst/l-state))))
+
+  (p
+    (let [current-verse (get-in @st/r-state [:ui :verse])
+          line-ids (lst/get-lines-for-verse current-verse)
+          tag-ids (st/get-verse-tags)]
+      (all-positions line-ids tag-ids))))
 
 (js/setTimeout print-states 300)

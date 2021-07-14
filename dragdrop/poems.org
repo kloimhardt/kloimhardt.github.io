@@ -1,9 +1,9 @@
-* art
+* Art
 ** Kein Zaubertrank
-  Jedes Kind weiss:
-  kein bärtiger Mann
-  in ganz Gallien (? $\rightarrow$ !)
-  ist weiser
+  Jedes Kind weiss: ;; Kind 4
+  kein bärtiger Mann ;; Mann 1
+  in ganz Gallien ;; ganz 3
+  ist weiser ;; ist 2
   als Mirakulix.
 
   Sie hingegen war,
@@ -49,7 +49,7 @@
   ist unmöglich
   
 ** Taunusanlage
-     Frankfurt im Spätherbst.
+  Frankfurt im Spätherbst.
 
   Er,
   unrasiert,

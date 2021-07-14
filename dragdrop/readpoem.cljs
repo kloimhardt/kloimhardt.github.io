@@ -24,13 +24,15 @@
   (when s (string/trim s)))
 
 (defn split-line [str-line]
-  (let [[line tag] (map trim-nil (string/split str-line #";;"))]
+  (let [[line tag-and-sort-idx] (map trim-nil (string/split str-line #";;"))
+        [tag tag-sort-idx] (if tag-and-sort-idx (string/split tag-and-sort-idx #" ") [nil nil])]
     (if (and tag (re-find (re-pattern tag) line))
       (if (string/starts-with? line tag)
-        {:part1 nil :tag tag :part2 (subs line (inc (count tag)))}
+        {:part1 nil :tag tag :part2 (subs line (inc (count tag))) :tag-sort-idx tag-sort-idx}
         (let [[part1 part2] (string/split line (re-pattern tag))]
           {:part1 (string/trim part1) :tag tag
-           :part2 (trim-nil part2)}))
+           :part2 (trim-nil part2)
+           :tag-sort-idx tag-sort-idx}))
       {:part1 line :tag nil :part2 nil})))
 
 (defn lines [raw-poems]

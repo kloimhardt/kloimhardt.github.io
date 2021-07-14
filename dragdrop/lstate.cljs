@@ -4,7 +4,9 @@
                          :blank-chars "__"
                          :line-height 20
                          :line-distance 2
-                         :tag-height 50}))
+                         :tag-height 50
+                         :tag-distance 1.2
+                         :left-margin 10}))
 
 (defn set-current-tag-id [id]
   (vswap! l-state assoc :current-id id))
