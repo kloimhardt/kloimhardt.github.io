@@ -31,7 +31,7 @@
   (lst/set-current-tag-id nil))
 
 (defn get-line-id-when-pos-in-fig [x y]
-  (->> (lst/get-tag-fig-rects)
+  (->> (:fig-rects @lst/ui-state)
        (map (fn [[id [x-start x-end top bottom]]]
               (when (and (or (true? x) (< x-start x x-end)) (< top y bottom)) id)))
        (some identity)))
@@ -44,11 +44,11 @@
     (println "good")))
 
 (defn drag [e]
-  (when-let [tag-id (lst/get-current-tag-id)]
-    (let [[ox oy] (lst/get-current-tag-offset)
+  (when-let [tag-id (:current-id @lst/ui-state)]
+    (let [[ox oy] (:offset @lst/ui-state)
           [mx my] (get-mouse-positon e)
           [posx posy] [(+ mx ox) (+ my oy)]
-          midy (- posy (/ (lst/get-tag-height) 4))]
+          midy (- posy (/ (:tag-height lst/config) 4))]
       (st/set-tag-pos tag-id posx posy)
       (if-let [line-id (get-line-id-when-pos-in-fig true midy)]
         (when (= (st/get-line-tag-id line-id) :blank)
@@ -90,7 +90,7 @@
         tag-initial-positions))
 
 (defn all-positions [line-ids tag-ids]
-  (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin]} @lst/l-state
+  (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin]} lst/config
         psize (* line-height line-distance)]
     {:line-positions
      (map-indexed (fn [idx line-id]
@@ -107,11 +107,15 @@
                     (get-in lines [tag-id :tag-sort-idx])))]])
           tag-ids)}))
 
+(defn get-lines-for-verse [config [category poem verse]]
+  (map (fn [line-idx] [category poem verse line-idx])
+       (range (get-in (:verse-lengths config) [category poem verse]))))
+
 (defn go-to-verse [verse-vec]
   (st/set-verse verse-vec)
-  (let [line-ids (lst/get-lines-for-verse verse-vec)
+  (let [line-ids (get-lines-for-verse lst/config verse-vec)
         tag-ids (lst/filter-lines-with-tags line-ids)
         {:keys [line-positions tag-initial-positions]} (all-positions line-ids tag-ids)]
     (st/set-tag-to-blank-for-lines tag-ids)
-    (set-tag-fig-rects! line-positions (:line-height @lst/l-state))
+    (set-tag-fig-rects! line-positions (:line-height lst/config))
     (set-tag-positions! tag-initial-positions)))

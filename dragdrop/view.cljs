@@ -4,11 +4,11 @@
             [dragdrop :as dd]))
 
 (defn pc [x]
-  (println x)
+  ;;(println x)
   x)
 
 (defn plot-tags [& _]
-  (let [{:keys [lines tag-height]} @lst/l-state]
+  (let [{:keys [lines tag-height]} lst/config]
     (fn [line-ids tag-positions]
       (pc "plot-tags")
       [:<>
@@ -21,7 +21,7 @@
             line-ids)])))
 
 (defn plot-poem [& _]
-  (let [{:keys [lines line-height] :as params} @lst/l-state]
+  (let [{:keys [lines line-height] :as params} lst/config]
     (fn [line-ids tag-ids]
       (pc "plot-poem")
       [:<>
@@ -36,7 +36,7 @@
             line-ids)])))
 
 (defn svg-canvas [& _]
-  (let [{:keys [fill-color]} @lst/l-state]
+  (let [{:keys [fill-color]} lst/config]
     (fn [line-ids tag-ids tag-positions]
       (pc "svg-canvas")
       [:svg {:width "100%" :height "90%"}
@@ -46,7 +46,7 @@
        [plot-tags (keys tag-ids) tag-positions]])))
 
 (defn categories []
-  (let [nof-categories (count (:verse-lengths @lst/l-state))]
+  (let [nof-categories (count (:verse-lengths lst/config))]
     (fn []
       (pc "categories")
       [:<>
@@ -63,7 +63,7 @@
                    [:a {:on-click #(do (dd/go-to-verse [ui-category p-idx 0])
                                        (st/set-category nil))}
                     (lst/get-poem-title ui-category p-idx)]])
-                (get (:verse-lengths @lst/l-state) ui-category))])
+                (get (:verse-lengths lst/config) ui-category))])
 
 (defn main []
   (dd/go-to-verse [0 0 0])
@@ -79,4 +79,4 @@
              tag-positions (get-in @st/r-state [:ui :tags])]
          [:<>
           [categories]
-          [svg-canvas (lst/get-lines-for-verse current-verse) tag-ids tag-positions]]))]))
+          [svg-canvas (dd/get-lines-for-verse lst/config current-verse) tag-ids tag-positions]]))]))
