@@ -97,17 +97,18 @@
 
 (defn plot-poem [& _]
   (let [{:keys [lines line-height] :as params} @lst/l-state]
-    (fn [line-positions tag-ids]
+    (fn [line-ids tag-ids]
       (pc "plot-poem")
       [:<>
-       (map (fn [[line-id [x y]]]
-              (let [tag (get-momentary-tag line-id tag-ids params)
+       (map (fn [line-id]
+              (let [[x _ _ y] (get-in @lst/ui-state [:fig-rects line-id])
+                    tag (get-momentary-tag line-id tag-ids params)
                     {:keys [part1 part2]} (get lines line-id)
                     str-line (str part1 (when part1 " ") tag " " part2)]
                 ^{:key line-id}
                 [:text {:x x :y y :font-size line-height}
                  str-line]))
-            line-positions)])))
+            line-ids)])))
 
 (defn set-tag-fig-rects! [line-positions line-height]
   (run! (fn [[line-id [x y]]]
@@ -122,11 +123,12 @@
   (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin]} @lst/l-state
         psize (* line-height line-distance)]
     {:line-positions
-     (map-indexed (fn [idx line-id]
-                    [line-id
-                     [left-margin
-                      (* psize (inc idx))]])
-                  line-ids)
+     (into {}
+           (map-indexed (fn [idx line-id]
+                          [line-id
+                           [left-margin
+                            (* psize (inc idx))]])
+                        line-ids))
      :tag-initial-positions
      (map (fn [tag-id]
             [tag-id
@@ -162,7 +164,7 @@
         [:svg {:width "100%" :height "70%"}
          [:rect {:x 0, :y 0, :width "100%", :height "100%"
                  :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
-         [plot-poem line-positions tag-ids]
+         [plot-poem line-ids tag-ids]
          [plot-tags (keys tag-ids) tag-positions]]))))
 
 (defn go-to-verse [verse-vec]
