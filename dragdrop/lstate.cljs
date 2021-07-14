@@ -1,6 +1,5 @@
 (ns lstate)
 
-
 (def ui-state (volatile! {}))
 
 (defn set-current-tag-id [id]
