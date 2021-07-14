@@ -2,8 +2,7 @@
 
 (ns dragdrop
   (:require [state :as st]
-            [lstate :as lst]
-            [clojure.string :as string]))
+            [lstate :as lst]))
 
 (defn ps [x]
   (println x)
@@ -80,13 +79,12 @@
       (pc "plot-tags")
       [:<>
        (map (fn [line-id]
-                      (let [pos (get-in tag-positions [line-id :pos])]
-                        ^{:key line-id}
-                        [:text {:x (first pos) :y (last pos) :ref (fn [el] (when el (make-draggable el line-id)))
-                                :style {:cursor :move} :font-size tag-height}
-                         (get-in lines [line-id :tag])]
-                        ))
-                    line-ids)])))
+              (let [pos (get-in tag-positions [line-id :pos])]
+                ^{:key line-id}
+                [:text {:x (first pos) :y (last pos) :ref (fn [el] (when el (make-draggable el line-id)))
+                        :style {:cursor :move} :font-size tag-height}
+                 (get-in lines [line-id :tag])]))
+            line-ids)])))
 
 (defn get-momentary-tag [line-id tag-ids {:keys [lines blank-chars]}]
   (if-let [tag-id (get tag-ids line-id)]
@@ -135,13 +133,13 @@
               (+ (* psize (count line-ids))
                  (* tag-height tag-distance
                     (get-in lines [tag-id :tag-sort-idx])))]])
-           tag-ids)}))
+          tag-ids)}))
 
 (defn svg-canvas [& _]
   (let [{:keys [fill-color]} @lst/l-state]
     (fn [line-ids tag-ids tag-positions]
       (pc "svg-canvas")
-      [:svg {:width "100%" :height "70%"}
+      [:svg {:width "100%" :height "100%"}
        [:rect {:x 0, :y 0, :width "100%", :height "100%"
                :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
        [plot-poem line-ids tag-ids]
@@ -176,24 +174,18 @@
                     (lst/get-poem-title ui-category p-idx)]])
                 (get (:verse-lengths @lst/l-state) ui-category))])
 
-(defn main2 [& _]
-  (fn [tag-ids tag-positions ui-category current-verse]
-    (pc "main2")
-    [:div
-     (if ui-category
-       [:<>
-        [:button.button {:on-click #(st/set-category nil)} "back"]
-        [list-poems-for-category ui-category]]
-       [:<>
-        [categories]
-        [svg-canvas (lst/get-lines-for-verse current-verse) tag-ids tag-positions]])]))
-
 (defn main []
   (go-to-verse [0 0 0])
   (fn []
     (pc "main")
-    (let [current-verse (get-in @st/r-state [:ui :verse])
-          ui-category (get-in @st/r-state [:ui :category])
-          tag-ids (get-in @st/r-state [:poem-data :tags])
-          tag-positions (get-in @st/r-state [:ui :tags])]
-      [main2 tag-ids tag-positions ui-category current-verse])))
+    [:div
+     (if-let [ui-category (get-in @st/r-state [:ui :category])]
+       [:<>
+        [:button.button {:on-click #(st/set-category nil)} "back"]
+        [list-poems-for-category ui-category]]
+       (let [current-verse (get-in @st/r-state [:ui :verse])
+             tag-ids (get-in @st/r-state [:poem-data :tags])
+             tag-positions (get-in @st/r-state [:ui :tags])]
+         [:<>
+          [categories]
+          [svg-canvas (lst/get-lines-for-verse current-verse) tag-ids tag-positions]]))]))
