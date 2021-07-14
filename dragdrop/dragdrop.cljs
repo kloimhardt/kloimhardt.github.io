@@ -10,7 +10,7 @@
   x)
 
 (defn pc [x]
-  ;;(println x)
+  (println x)
   x)
 
 (defn p [x]
@@ -80,12 +80,12 @@
       (pc "plot-tags")
       [:<>
        (map (fn [line-id]
-                      (if-let [pos (get-in tag-positions [line-id :pos])]
+                      (let [pos (get-in tag-positions [line-id :pos])]
                         ^{:key line-id}
                         [:text {:x (first pos) :y (last pos) :ref (fn [el] (when el (make-draggable el line-id)))
                                 :style {:cursor :move} :font-size tag-height}
                          (get-in lines [line-id :tag])]
-                        (st/set-tag-pos line-id (+ 10 (* 100 (get-in lines [line-id :tag-sort-idx]))) 200)))
+                        ))
                     line-ids)])))
 
 (defn get-momentary-tag [line-id tag-ids {:keys [lines blank-chars]}]
@@ -123,25 +123,6 @@
   (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin]} @lst/l-state
         psize (* line-height line-distance)]
     {:line-positions
-     (into {}
-           (map-indexed (fn [idx line-id]
-                          [line-id
-                           [left-margin
-                            (* psize (inc idx))]])
-                        line-ids))
-     :tag-initial-positions
-     (map (fn [tag-id]
-            [tag-id
-             [left-margin
-              (+ (* psize (count line-ids))
-                 (* tag-height tag-distance
-                    (get-in lines [tag-id :tag-sort-idx])))]])
-          (keys tag-ids))}))
-
-(defn all-positions2 [line-ids tag-ids]
-  (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin]} @lst/l-state
-        psize (* line-height line-distance)]
-    {:line-positions
      (map-indexed (fn [idx line-id]
                     [line-id
                      [left-margin
@@ -157,58 +138,62 @@
            tag-ids)}))
 
 (defn svg-canvas [& _]
-  (let [{:keys [fill-color line-height]} @lst/l-state]
+  (let [{:keys [fill-color]} @lst/l-state]
     (fn [line-ids tag-ids tag-positions]
       (pc "svg-canvas")
-      (let [{:keys [line-positions tag-initial-positions]} (all-positions line-ids tag-ids)]
-        [:svg {:width "100%" :height "70%"}
-         [:rect {:x 0, :y 0, :width "100%", :height "100%"
-                 :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
-         [plot-poem line-ids tag-ids]
-         [plot-tags (keys tag-ids) tag-positions]]))))
+      [:svg {:width "100%" :height "70%"}
+       [:rect {:x 0, :y 0, :width "100%", :height "100%"
+               :fill fill-color :ref (fn [el] (when el (dragarea el)))}]
+       [plot-poem line-ids tag-ids]
+       [plot-tags (keys tag-ids) tag-positions]])))
 
 (defn go-to-verse [verse-vec]
   (st/set-verse verse-vec)
   (let [line-ids (lst/get-lines-for-verse verse-vec)
         tag-ids (lst/filter-lines-with-tags line-ids)
-        {:keys [line-positions tag-initial-positions]} (all-positions2 line-ids tag-ids)]
+        {:keys [line-positions tag-initial-positions]} (all-positions line-ids tag-ids)]
     (st/set-tag-to-blank-for-lines tag-ids)
     (set-tag-fig-rects! line-positions (:line-height @lst/l-state))
-    (p "hu")
-    (ps line-positions)
-    (ps tag-initial-positions)
-    ))
+    (set-tag-positions! tag-initial-positions)))
+
+(defn categories []
+  (let [nof-categories (count (:verse-lengths @lst/l-state))]
+    (fn []
+      (pc "categories")
+      [:<>
+       (map
+         (fn [category-idx] ^{:key category-idx} [:button.button {:on-click #(st/set-category category-idx)}
+                                                  (lst/get-category category-idx)])
+         (range nof-categories))])))
+
+(defn list-poems-for-category [ui-category]
+  [:<>
+   (map-indexed (fn [p-idx _]
+                  ^{:key p-idx}
+                  [:p
+                   [:a {:on-click #(do (go-to-verse [ui-category p-idx 0])
+                                       (st/set-category nil))}
+                    (lst/get-poem-title ui-category p-idx)]])
+                (get (:verse-lengths @lst/l-state) ui-category))])
 
 (defn main2 [& _]
-  (let [nof-categories (count (:verse-lengths @lst/l-state))]
-    (fn [tag-ids tag-positions ui-category current-verse]
-      (pc "main2")
-      (let [line-ids (lst/get-lines-for-verse current-verse)]
-        [:div
-         (if ui-category
-           [:div
-            [:button.button {:on-click #(st/set-category nil)} "back"]
-            (map-indexed (fn [p-idx _]
-                           ^{:key p-idx}
-                           [:p
-                            [:a {:on-click #(do (go-to-verse [ui-category p-idx 0])
-                                                (st/set-category nil))}
-                             (lst/get-poem-title ui-category p-idx)]])
-                         (get (:verse-lengths @lst/l-state) ui-category))]
-           [:div
-            (map
-              (fn [category-idx] ^{:key category-idx} [:button.button {:on-click #(st/set-category category-idx)}
-                                                       (lst/get-category category-idx)])
-              (range nof-categories))
-            [svg-canvas line-ids tag-ids tag-positions]])
-         [:p (str @st/r-state)]]))))
+  (fn [tag-ids tag-positions ui-category current-verse]
+    (pc "main2")
+    [:div
+     (if ui-category
+       [:<>
+        [:button.button {:on-click #(st/set-category nil)} "back"]
+        [list-poems-for-category ui-category]]
+       [:<>
+        [categories]
+        [svg-canvas (lst/get-lines-for-verse current-verse) tag-ids tag-positions]])]))
 
 (defn main []
   (go-to-verse [0 0 0])
   (fn []
     (pc "main")
     (let [current-verse (get-in @st/r-state [:ui :verse])
-          tag-ids (st/get-verse-tags)
-          tag-positions (st/get-ui-tags)
-          ui-category (get-in @st/r-state [:ui :category])]
+          ui-category (get-in @st/r-state [:ui :category])
+          tag-ids (get-in @st/r-state [:poem-data :tags])
+          tag-positions (get-in @st/r-state [:ui :tags])]
       [main2 tag-ids tag-positions ui-category current-verse])))
