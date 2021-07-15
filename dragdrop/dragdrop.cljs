@@ -40,7 +40,7 @@
   (when (every? true?
                 (map (fn [[line-id tag-id]]
                        (= line-id tag-id))
-                     (get-in @st/r-state [:poem-data :tags])
+                     (:current-tags @st/r-state)
                      ))
     (println "good")))
 
@@ -55,10 +55,10 @@
           midy (- posy (/ (:tag-height lst/config) 4))]
       (st/set-tag-pos tag-id posx posy)
       (if-let [line-id (get-line-id-when-pos-in-fig true midy)]
-        (when (= (get-in @st/r-state [:poem-data :tags line-id]) :blank)
+        (when (= (get-in @st/r-state [:current-tags line-id]) :blank)
           (st/set-line-tag-id line-id tag-id)
           (poem-correct?))
-        (when-let [line-id (first (get-lines-for-tag-id (get-in @st/r-state [:poem-data :tags]) tag-id))]
+        (when-let [line-id (first (get-lines-for-tag-id (:current-tags @st/r-state) tag-id))]
           (st/set-line-tag-id line-id :blank))))))
 
 (defn dragarea [el]

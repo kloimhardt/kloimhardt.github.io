@@ -71,13 +71,13 @@
   (fn []
     (pc "main")
     [:div
-     (if-let [ui-category (get-in @st/r-state [:ui :category])]
+     (if-let [ui-category (:current-category @st/r-state)]
        [:<>
         [:button.button {:on-click #(st/set-category nil)} "back"]
         [list-poems-for-category ui-category]]
-       (let [current-verse (get-in @st/r-state [:poem-data :verse])
-             tag-ids (get-in @st/r-state [:poem-data :tags])
+       (let [current-verse (:current-verse @st/r-state)
+             current-tags (:current-tags @st/r-state)
              tag-positions (get-in @st/r-state [:ui :tags])]
          [:<>
           [categories]
-          [svg-canvas current-verse tag-ids tag-positions]]))]))
+          [svg-canvas current-verse current-tags tag-positions]]))]))
