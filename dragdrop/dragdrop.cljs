@@ -36,14 +36,6 @@
               (when (and (or (true? x) (< x-start x x-end)) (< top y bottom)) id)))
        (some identity)))
 
-(defn poem-correct? []
-  (when (every? true?
-                (map (fn [[line-id tag-id]]
-                       (= line-id tag-id))
-                     (:current-tags @st/r-state)
-                     ))
-    (println "good")))
-
 (defn get-lines-for-tag-id [tags tag-id]
   (map first (filter (fn [[_ line]] (= line tag-id)) tags)))
 
@@ -56,8 +48,7 @@
       (st/set-tag-pos tag-id posx posy)
       (if-let [line-id (get-line-id-when-pos-in-fig true midy)]
         (when (= (get-in @st/r-state [:current-tags line-id]) :blank)
-          (st/set-line-tag-id line-id tag-id)
-          (poem-correct?))
+          (st/set-line-tag-id line-id tag-id))
         (when-let [line-id (first (get-lines-for-tag-id (:current-tags @st/r-state) tag-id))]
           (st/set-line-tag-id line-id :blank))))))
 
@@ -96,18 +87,18 @@
         tag-initial-positions))
 
 (defn all-positions [line-ids tag-ids]
-  (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin]} lst/config
+  (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin-poem left-margin-tags]} lst/config
         psize (* line-height line-distance)]
     {:line-positions
      (map-indexed (fn [idx line-id]
                     [line-id
-                     [left-margin
+                     [left-margin-poem
                       (* psize (inc idx))]])
                   line-ids)
      :tag-initial-positions
      (map (fn [tag-id]
             [tag-id
-             [left-margin
+             [left-margin-tags
               (+ (* psize (count line-ids))
                  (* tag-height tag-distance
                     (get-in lines [tag-id :tag-sort-idx])))]])
@@ -131,3 +122,9 @@
 
 (defn get-poem-title [lines category-idx title-idx]
   (get-in lines [[category-idx title-idx 0 -1] :part1]))
+
+(defn poem-correct? [current-tags]
+  (every? true?
+          (map (fn [[line-id tag-id]]
+                 (= line-id tag-id))
+               current-tags)))

@@ -23,3 +23,6 @@
 
 (defn set-category [category]
   (swap! r-state assoc :current-category category))
+
+(defn set-supress-tags [verse-vec bool]
+  (swap! r-state assoc-in [:supress-tags? verse-vec] bool))

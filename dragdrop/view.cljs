@@ -22,27 +22,32 @@
 
 (defn plot-poem [& _]
   (let [{:keys [lines line-height blank-chars]} lst/config]
-    (fn [current-verse current-tags]
+    (fn [current-verse current-tags supress-tags?]
       (pc "plot-poem")
+      (when (dd/poem-correct? current-tags) (st/set-supress-tags current-verse true))
       (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
         [:<>
          (map (fn [line-id]
                 (let [[x _ _ y] (get-in @lst/ui-state [:fig-rects line-id])
-                      tag (dd/get-momentary-tag line-id current-tags lines blank-chars)
-                      {:keys [part1 part2]} (get lines line-id)
+                      line (get lines line-id)
+                      tag (if-not supress-tags?
+                            (dd/get-momentary-tag line-id current-tags lines blank-chars)
+                            (:tag line))
+                      {:keys [part1 part2]} line
                       str-line (str part1 (when part1 " ") tag " " part2)]
                   ^{:key line-id}
                   [:text {:x x :y y :font-size line-height}
                    str-line]))
               line-ids)]))))
 
-(defn svg-canvas [current-verse current-tags tag-positions]
+(defn svg-canvas [current-verse current-tags tag-positions supress-tags?]
   (pc "svg-canvas")
-  [:svg {:width "100%" :height "90%"}
+  [:svg {:width "100%" :height "100%"}
    [:rect {:x 0, :y 0, :width "100%", :height "100%"
            :fill (:fill-color lst/config) :ref (fn [el] (when el (dd/dragarea el)))}]
-   [plot-poem current-verse current-tags]
-   [plot-tags current-tags tag-positions]])
+   [plot-poem current-verse current-tags supress-tags?]
+   (when-not supress-tags?
+     [plot-tags current-tags tag-positions])])
 
 (defn categories []
   (let [nof-categories (count (:verse-lengths lst/config))]
@@ -82,7 +87,8 @@
           [list-poems-for-category category-idx])]
        (let [current-verse (:current-verse @st/r-state)
              current-tags (:current-tags @st/r-state)
-             tag-positions (:tag-positions @st/r-state)]
+             tag-positions (:tag-positions @st/r-state)
+             supress-tags? (:supress-tags? @st/r-state)]
          [:<>
           [categories]
-          [svg-canvas current-verse current-tags tag-positions]]))]))
+          [svg-canvas current-verse current-tags tag-positions supress-tags?]]))]))

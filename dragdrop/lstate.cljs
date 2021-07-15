@@ -22,7 +22,8 @@
                          :line-distance 2
                          :tag-height 50
                          :tag-distance 1.2
-                         :left-margin 10}))
+                         :left-margin-poem 10
+                         :left-margin-tags 50}))
 
 (defn set-lines-and-verse-lengths [{:keys [verse-lengths lines]}]
   (vswap! l-state assoc :verse-lengths verse-lengths :lines lines))
