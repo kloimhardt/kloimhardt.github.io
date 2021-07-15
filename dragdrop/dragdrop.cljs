@@ -23,7 +23,7 @@
 (defn start-drag [id]
   (fn [e]
     (lst/set-current-tag-id id)
-    (let [[x y] (st/get-tag-pos id)
+    (let [[x y] (get-in @st/r-state [:ui :tags id :pos])
           [mx my] (get-mouse-positon e)]
       (lst/set-current-tag-offset (- x mx) (- y my)))))
 
@@ -40,8 +40,12 @@
   (when (every? true?
                 (map (fn [[line-id tag-id]]
                        (= line-id tag-id))
-                     (st/get-verse-tags)))
+                     (get-in @st/r-state [:poem-data :tags])
+                     ))
     (println "good")))
+
+(defn get-lines-for-tag-id [tags tag-id]
+  (map first (filter (fn [[_ line]] (= line tag-id)) tags)))
 
 (defn drag [e]
   (when-let [tag-id (:current-id @lst/ui-state)]
@@ -54,7 +58,7 @@
         (when (= (get-in @st/r-state [:poem-data :tags line-id]) :blank)
           (st/set-line-tag-id line-id tag-id)
           (poem-correct?))
-        (when-let [line-id (first (st/get-lines-for-tag-id tag-id))]
+        (when-let [line-id (first (get-lines-for-tag-id (get-in @st/r-state [:poem-data :tags]) tag-id))]
           (st/set-line-tag-id line-id :blank))))))
 
 (defn dragarea [el]
