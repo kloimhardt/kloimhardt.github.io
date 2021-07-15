@@ -51,7 +51,7 @@
           midy (- posy (/ (:tag-height lst/config) 4))]
       (st/set-tag-pos tag-id posx posy)
       (if-let [line-id (get-line-id-when-pos-in-fig true midy)]
-        (when (= (st/get-line-tag-id line-id) :blank)
+        (when (= (get-in @st/r-state [:poem-data :tags line-id]) :blank)
           (st/set-line-tag-id line-id tag-id)
           (poem-correct?))
         (when-let [line-id (first (st/get-lines-for-tag-id tag-id))]
@@ -119,3 +119,9 @@
     (st/set-tag-to-blank-for-lines tag-ids)
     (set-tag-fig-rects! line-positions (:line-height lst/config))
     (set-tag-positions! tag-initial-positions)))
+
+(defn get-category [lines category-idx]
+  (get-in lines [[category-idx -1 0 -1] :part1]))
+
+(defn get-poem-title [lines category-idx title-idx]
+  (get-in lines [[category-idx title-idx 0 -1] :part1]))

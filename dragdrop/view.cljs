@@ -53,7 +53,7 @@
       [:<>
        (map
          (fn [category-idx] ^{:key category-idx} [:button.button {:on-click #(st/set-category category-idx)}
-                                                  (lst/get-category category-idx)])
+                                                  (dd/get-category (:lines lst/config) category-idx)])
          (range nof-categories))])))
 
 (defn list-poems-for-category [ui-category]
@@ -63,7 +63,7 @@
                   [:p
                    [:a {:on-click #(do (dd/go-to-verse [ui-category p-idx 0])
                                        (st/set-category nil))}
-                    (lst/get-poem-title ui-category p-idx)]])
+                    (dd/get-poem-title (:lines lst/config) ui-category p-idx)]])
                 (get (:verse-lengths lst/config) ui-category))])
 
 (defn main []

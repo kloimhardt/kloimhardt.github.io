@@ -8,9 +8,6 @@
          (fn [state]
            (assoc-in state [:poem-data :tags line-id] tag-id))))
 
-(defn get-line-tag-id [line-id]
-  (get-in @r-state [:poem-data :tags line-id]))
-
 (defn get-verse-tags []
   (get-in @r-state [:poem-data :tags]))
 
