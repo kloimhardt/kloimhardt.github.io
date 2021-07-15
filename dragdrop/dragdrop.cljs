@@ -23,7 +23,7 @@
 (defn start-drag [id]
   (fn [e]
     (lst/set-current-tag-id id)
-    (let [[x y] (get-in @st/r-state [:ui :tags id :pos])
+    (let [[x y] (get-in @st/r-state [:tag-positions id])
           [mx my] (get-mouse-positon e)]
       (lst/set-current-tag-offset (- x mx) (- y my)))))
 

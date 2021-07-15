@@ -16,7 +16,7 @@
   (swap! r-state assoc :current-verse idx-vec))
 
 (defn set-tag-pos [id x y]
-  (swap! r-state assoc-in [:ui :tags id :pos] [x y]))
+  (swap! r-state assoc-in [:tag-positions id] [x y]))
 
 (defn set-category [category]
   (swap! r-state assoc :current-category category))

@@ -13,7 +13,7 @@
       (pc "plot-tags")
       [:<>
        (map (fn [line-id]
-              (let [[x y] (get-in tag-positions [line-id :pos])]
+              (let [[x y] (get tag-positions line-id)]
                 ^{:key line-id}
                 [:text {:x x :y y :ref (fn [el] (when el (dd/make-draggable el line-id)))
                         :style {:cursor :move} :font-size tag-height}
@@ -77,7 +77,7 @@
         [list-poems-for-category ui-category]]
        (let [current-verse (:current-verse @st/r-state)
              current-tags (:current-tags @st/r-state)
-             tag-positions (get-in @st/r-state [:ui :tags])]
+             tag-positions (:tag-positions @st/r-state)]
          [:<>
           [categories]
           [svg-canvas current-verse current-tags tag-positions]]))]))
