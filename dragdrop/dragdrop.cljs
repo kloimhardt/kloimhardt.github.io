@@ -77,19 +77,21 @@
     (.addEventListener "touchstart" (start-drag id))
     dragarea))
 
-(defn get-momentary-tag [line-id tag-ids {:keys [lines blank-chars]}]
-  (if-let [tag-id (get tag-ids line-id)]
+(defn get-momentary-tag [line-id current-tags lines blank-chars]
+  (if-let [tag-id (get current-tags line-id)]
     (if (= tag-id :blank)
       blank-chars
       (get-in lines [tag-id :tag]))
     (get-in lines [line-id :tag])))
 
 (defn set-tag-fig-rects! [line-positions line-height]
+  (lst/clear-tag-fig-rects)
   (run! (fn [[line-id [x y]]]
           (lst/set-tag-fig-rect line-id [x (+ x 10) (- y line-height) y]))
         line-positions))
 
 (defn set-tag-positions! [tag-initial-positions]
+  (st/clear-tag-positions)
   (run! (fn [[tag-id [x y]]] (st/set-tag-pos tag-id x y))
         tag-initial-positions))
 
@@ -124,7 +126,7 @@
     (set-tag-fig-rects! line-positions (:line-height lst/config))
     (set-tag-positions! tag-initial-positions)))
 
-(defn get-category [lines category-idx]
+(defn get-category-name [lines category-idx]
   (get-in lines [[category-idx -1 0 -1] :part1]))
 
 (defn get-poem-title [lines category-idx title-idx]

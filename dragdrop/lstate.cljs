@@ -13,6 +13,9 @@
 (defn set-tag-fig-rect [id rect]
   (vswap! ui-state assoc-in [:fig-rects id] rect))
 
+(defn clear-tag-fig-rects []
+  (vswap! ui-state dissoc :fig-rects))
+
 (def l-state (volatile! {:fill-color "#fafafa"
                          :blank-chars "__"
                          :line-height 20
