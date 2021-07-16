@@ -10,12 +10,12 @@
 (defn plot-next-button []
   [:polygon {:points (dd/add-duple-to-matrix (:right-arrow-position @lst/ui-state)
                                              (:right-arrow lst/config))
-             :on-click #(println "click-right")}])
+             :on-click #(dd/go-to-verse (dd/inc-verse (:current-verse @st/r-state)))}])
 
 (defn plot-prev-button []
   [:polygon {:points (dd/add-duple-to-matrix (:left-arrow-position @lst/ui-state)
                                              (:left-arrow lst/config))
-             :on-click #(println "click-left")}])
+             :on-click #(dd/go-to-verse (dd/dec-verse (:current-verse @st/r-state)))}])
 
 (defn plot-tags [& _]
   (let [{:keys [lines tag-height]} lst/config]
