@@ -31,8 +31,8 @@
                          :left-margin-poem 10
                          :left-margin-tags 50
                          :next-arrow-x 100
-                         :left-arrow [[40 0] [0 -20] [40 -40]]
-                         :right-arrow [[0 0] [40 -20] [0 -40]]}))
+                         :left-arrow [[40 0] [0 -15] [40 -30]]
+                         :right-arrow [[0 0] [40 -15] [0 -30]]}))
 
 (defn set-lines-and-verse-lengths [{:keys [verse-lengths lines]}]
   (vswap! l-state assoc :verse-lengths verse-lengths :lines lines))

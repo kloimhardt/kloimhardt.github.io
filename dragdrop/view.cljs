@@ -40,7 +40,7 @@
          (map (fn [line-id]
                 (let [[x _ _ y] (get-in @lst/ui-state [:fig-rects line-id])
                       line (get lines line-id)
-                      tag (if-not supress-tags?
+                      tag (if-not (get supress-tags? current-verse)
                             (dd/get-momentary-tag line-id current-tags lines blank-chars)
                             (:tag line))
                       {:keys [part1 part2]} line
@@ -50,16 +50,24 @@
                    str-line]))
               line-ids)]))))
 
+(defn plot-title [_]
+  (let [x (:left-margin-poem lst/config)
+        h (:line-height lst/config)]
+    (fn [current-verse]
+      [:text {:x x :y h :font-size h} (dd/get-poem-title (:lines lst/config) (first current-verse) (second current-verse))])))
+
 (defn svg-canvas [current-verse current-tags tag-positions supress-tags?]
   (pc "svg-canvas")
   [:svg {:width "100%" :height "100%"}
    [:rect {:x 0, :y 0, :width "100%", :height "100%"
            :fill (:fill-color lst/config) :ref (fn [el] (when el (dd/dragarea el)))}]
+   [plot-title current-verse]
    [plot-poem current-verse current-tags supress-tags?]
-   (when-not supress-tags?
+   (if (get supress-tags? current-verse)
+     [plot-next-button]
      [plot-tags current-tags tag-positions])
-   [plot-next-button]
-   [plot-prev-button]])
+   (when (get supress-tags? (dd/dec-verse current-verse))
+     [plot-prev-button])])
 
 (defn categories []
   (let [nof-categories (count (:verse-lengths lst/config))]

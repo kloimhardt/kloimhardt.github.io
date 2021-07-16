@@ -89,19 +89,20 @@
 (defn all-positions [line-ids tag-ids]
   (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin-poem left-margin-tags next-arrow-x]} lst/config
         psize (* line-height line-distance)
-        arrow-y (+ (* psize (count line-ids))
-                   (* tag-height tag-distance))]
+        arrow-y (* tag-height tag-distance)]
     {:line-positions
      (map-indexed (fn [idx line-id]
                     [line-id
                      [left-margin-poem
-                      (* psize (inc idx))]])
+                      (+ arrow-y
+                         (* psize (inc idx)))]])
                   line-ids)
      :tag-initial-positions
      (map (fn [tag-id]
             [tag-id
              [left-margin-tags
-              (+ (* psize (count line-ids))
+              (+ arrow-y
+                 (* psize (count line-ids))
                  (* tag-height tag-distance
                     (get-in lines [tag-id :tag-sort-idx])))]])
           tag-ids)
@@ -115,17 +116,18 @@
        (range (get-in (:verse-lengths config) [category poem verse]))))
 
 (defn go-to-verse [verse-vec]
-  (st/set-verse verse-vec)
   (let [line-ids (get-lines-for-verse lst/config verse-vec)
         tag-ids (filter #(:tag (get (:lines lst/config) %)) line-ids)
         {:keys [line-positions tag-initial-positions
                 left-arrow-position right-arrow-position]}
         (all-positions line-ids tag-ids)]
-    (st/set-tag-to-blank-for-lines tag-ids)
     (set-tag-fig-rects! line-positions (:line-height lst/config))
-    (set-tag-positions! tag-initial-positions)
     (lst/set-left-arrow-position left-arrow-position)
-    (lst/set-right-arrow-position right-arrow-position)))
+    (lst/set-right-arrow-position right-arrow-position)
+    (st/set-verse verse-vec)
+    (st/set-tag-to-blank-for-lines tag-ids)
+    (set-tag-positions! tag-initial-positions)))
+
 
 (defn get-category-name [lines category-idx]
   (get-in lines [[category-idx -1 0 -1] :part1]))
