@@ -7,6 +7,16 @@
   ;;(println x)
   x)
 
+(defn plot-next-button []
+  [:polygon {:points (dd/add-duple-to-matrix (:right-arrow-position @lst/ui-state)
+                                             (:right-arrow lst/config))
+             :on-click #(println "click-right")}])
+
+(defn plot-prev-button []
+  [:polygon {:points (dd/add-duple-to-matrix (:left-arrow-position @lst/ui-state)
+                                             (:left-arrow lst/config))
+             :on-click #(println "click-left")}])
+
 (defn plot-tags [& _]
   (let [{:keys [lines tag-height]} lst/config]
     (fn [current-tags tag-positions]
@@ -47,7 +57,9 @@
            :fill (:fill-color lst/config) :ref (fn [el] (when el (dd/dragarea el)))}]
    [plot-poem current-verse current-tags supress-tags?]
    (when-not supress-tags?
-     [plot-tags current-tags tag-positions])])
+     [plot-tags current-tags tag-positions])
+   [plot-next-button]
+   [plot-prev-button]])
 
 (defn categories []
   (let [nof-categories (count (:verse-lengths lst/config))]

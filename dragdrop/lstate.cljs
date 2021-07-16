@@ -16,6 +16,12 @@
 (defn clear-tag-fig-rects []
   (vswap! ui-state dissoc :fig-rects))
 
+(defn set-left-arrow-position [pos]
+  (vswap! ui-state assoc :left-arrow-position pos))
+
+(defn set-right-arrow-position [pos]
+  (vswap! ui-state assoc :right-arrow-position pos))
+
 (def l-state (volatile! {:fill-color "#fafafa"
                          :blank-chars "__"
                          :line-height 20
@@ -23,7 +29,10 @@
                          :tag-height 50
                          :tag-distance 1.2
                          :left-margin-poem 10
-                         :left-margin-tags 50}))
+                         :left-margin-tags 50
+                         :next-arrow-x 100
+                         :left-arrow [[40 0] [0 -20] [40 -40]]
+                         :right-arrow [[0 0] [40 -20] [0 -40]]}))
 
 (defn set-lines-and-verse-lengths [{:keys [verse-lengths lines]}]
   (vswap! l-state assoc :verse-lengths verse-lengths :lines lines))
