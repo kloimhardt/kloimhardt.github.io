@@ -18,7 +18,7 @@
              :on-click #(dd/go-to-verse (dd/dec-verse (:current-verse @st/r-state)))}])
 
 (defn plot-tags [& _]
-  (let [{:keys [lines tag-height]} lst/config]
+  (let [{:keys [lines line-height]} lst/config]
     (fn [current-tags tag-positions]
       (pc "plot-tags")
       [:<>
@@ -26,8 +26,21 @@
               (let [[x y] (get tag-positions line-id)]
                 ^{:key line-id}
                 [:text {:x x :y y :ref (fn [el] (when el (dd/make-draggable el line-id)))
-                        :style {:cursor :move} :font-size tag-height}
+                        :style {:cursor :move} :font-size line-height}
                  (get-in lines [line-id :tag])]))
+            (keys current-tags))])))
+
+(defn plot-tag-rects [& _]
+  (let [{:keys [tag-height line-height fill-color tag-rect-width]} lst/config]
+    (fn [current-tags tag-positions]
+      (pc "plot-tags")
+      [:<>
+       (map (fn [line-id]
+              (let [[x y] (get tag-positions line-id)]
+                ^{:key line-id}
+                [:rect {:x x :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height :fill "blue"
+                        :ref (fn [el] (when el (dd/make-draggable el line-id)))}]
+                ))
             (keys current-tags))])))
 
 (defn plot-poem [& _]
@@ -61,6 +74,7 @@
   [:svg {:width "100%" :height "100%"}
    [:rect {:x 0, :y 0, :width "100%", :height "100%"
            :fill (:fill-color lst/config) :ref (fn [el] (when el (dd/dragarea el)))}]
+   [plot-tag-rects current-tags tag-positions]
    [plot-title current-verse]
    [plot-poem current-verse current-tags supress-tags?]
    (if (get supress-tags? current-verse)
@@ -101,7 +115,7 @@
     [:div
      (if-let [category-idx (:current-category @st/r-state)]
        [:<>
-        [:button.button {:on-click #(st/set-category nil)} "Back3"]
+        [:button.button {:on-click #(st/set-category nil)} "Back"]
         (if (= "State" (dd/get-category-name (:lines lst/config) category-idx))
           [dbg-state]
           [list-poems-for-category category-idx])]

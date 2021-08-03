@@ -22,14 +22,17 @@
 (defn set-right-arrow-position [pos]
   (vswap! ui-state assoc :right-arrow-position pos))
 
+(def line-height 20)
+(def line-distance 2)
 (def l-state (volatile! {:fill-color "#fafafa"
                          :blank-chars "__"
-                         :line-height 20
-                         :line-distance 2
-                         :tag-height 50
+                         :line-height line-height
+                         :line-distance line-distance
+                         :tag-height (* line-height line-distance 0.9)
+                         :tag-rect-width 500
                          :tag-distance 1.2
                          :left-margin-poem 10
-                         :left-margin-tags 50
+                         :left-margin-tags 10
                          :next-arrow-x 100
                          :left-arrow [[40 0] [0 -15] [40 -30]]
                          :right-arrow [[0 0] [40 -15] [0 -30]]}))
