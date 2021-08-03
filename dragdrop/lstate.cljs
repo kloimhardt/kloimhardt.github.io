@@ -16,6 +16,9 @@
 (defn clear-line-positions []
   (vswap! ui-state dissoc :line-positions))
 
+(defn set-tag-x-position [line-id x]
+  (vswap! ui-state assoc-in [:tag-x-positions line-id] x))
+
 (defn set-left-arrow-position [pos]
   (vswap! ui-state assoc :left-arrow-position pos))
 

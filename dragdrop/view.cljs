@@ -63,11 +63,8 @@
                       str-line (str part1 (when part1 " ") tag " " part2)]
                   ^{:key line-id}
                   [:text {:x x :y y :font-size line-height
-                          :ref (fn[el] (if el
-                                         (do
-                                           (pd "gel" (count nil))
-                                           (pc (.-x (.getStartPositionOfChar el (if (and part1 tag) (inc (count part1)) 0)))))
-                                         (pc "no element in plot-poem")))}
+                          :ref (fn[el] (when (and el (not (get-in @lst/ui-state [:tag-x-positions line-id])))
+                                         (lst/set-tag-x-position line-id (.-x (.getStartPositionOfChar el (if (and part1 tag) (inc (count part1)) 0))))))}
                    str-line]))
               line-ids)]))))
 
