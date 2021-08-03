@@ -1,11 +1,14 @@
 (ns view
   (:require [state :as st]
             [lstate :as lst]
-            [dragdrop :as dd]))
+            [dragdrop :as dd]
+            [clojure.string :as s]))
 
 (defn pc [x]
-  ;;(println x)
+  (println x)
   x)
+
+(def pd js/console.log)
 
 (defn plot-next-button []
   [:polygon {:points (dd/add-duple-to-matrix (:right-arrow-position @lst/ui-state)
@@ -59,7 +62,12 @@
                       {:keys [part1 part2]} line
                       str-line (str part1 (when part1 " ") tag " " part2)]
                   ^{:key line-id}
-                  [:text {:x x :y y :font-size line-height}
+                  [:text {:x x :y y :font-size line-height
+                          :ref (fn[el] (if el
+                                         (do
+                                           (pd "gel" (count nil))
+                                           (pc (.-x (.getStartPositionOfChar el (if (and part1 tag) (inc (count part1)) 0)))))
+                                         (pc "no element in plot-poem")))}
                    str-line]))
               line-ids)]))))
 
