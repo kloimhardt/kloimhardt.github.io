@@ -2,19 +2,13 @@
 
 (def ui-state (volatile! {:current-id nil
                           :offset nil
-                          :fig-rects nil}))
+                          :line-positions nil}))
 
 (defn set-current-tag-id [id]
   (vswap! ui-state assoc :current-id id))
 
 (defn set-current-tag-offset [ox oy]
   (vswap! ui-state assoc :offset [ox oy]))
-
-(defn set-tag-fig-rect [id rect]
-  (vswap! ui-state assoc-in [:fig-rects id] rect))
-
-(defn clear-tag-fig-rects []
-  (vswap! ui-state dissoc :fig-rects))
 
 (defn set-line-position [id x y]
   (vswap! ui-state assoc-in [:line-positions id] [x y]))

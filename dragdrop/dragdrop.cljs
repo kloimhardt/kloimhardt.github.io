@@ -30,12 +30,6 @@
 (defn end-drag [_e]
   (lst/set-current-tag-id nil))
 
-#_(defn get-line-id-when-pos-in-fig-old [x y]
-  (->> (:fig-rects @lst/ui-state)
-       (map (fn [[id [x-start x-end top bottom]]]
-              (when (and (or (true? x) (< x-start x x-end)) (< top y bottom)) id)))
-       (some identity)))
-
 (defn get-line-id-when-pos-in-line [y line-height]
   (->> (:line-positions @lst/ui-state)
        (map (fn [[id [_line-x line-y]]]
@@ -80,12 +74,6 @@
       blank-chars
       (get-in lines [tag-id :tag]))
     (get-in lines [line-id :tag])))
-
-(defn set-tag-fig-rects! [line-positions line-height]
-  (lst/clear-tag-fig-rects)
-  (run! (fn [[line-id [x y]]]
-          (lst/set-tag-fig-rect line-id [x (+ x 10) (- y line-height) y]))
-        line-positions))
 
 (defn set-line-positions! [line-positions]
   (lst/clear-line-positions)
@@ -133,7 +121,6 @@
         {:keys [line-positions tag-initial-positions
                 left-arrow-position right-arrow-position]}
         (all-positions line-ids tag-ids)]
-    (set-tag-fig-rects! line-positions (:line-height lst/config))
     (set-line-positions! line-positions)
     (lst/set-left-arrow-position left-arrow-position)
     (lst/set-right-arrow-position right-arrow-position)
