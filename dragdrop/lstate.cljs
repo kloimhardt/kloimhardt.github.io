@@ -16,6 +16,12 @@
 (defn clear-tag-fig-rects []
   (vswap! ui-state dissoc :fig-rects))
 
+(defn set-line-position [id x y]
+  (vswap! ui-state assoc-in [:line-positions id] [x y]))
+
+(defn clear-line-positions []
+  (vswap! ui-state dissoc :line-positions))
+
 (defn set-left-arrow-position [pos]
   (vswap! ui-state assoc :left-arrow-position pos))
 

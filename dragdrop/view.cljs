@@ -5,7 +5,7 @@
             [clojure.string :as s]))
 
 (defn pc [x]
-  (println x)
+  ;;(println x)
   x)
 
 (def pd js/console.log)
@@ -54,7 +54,7 @@
       (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
         [:<>
          (map (fn [line-id]
-                (let [[x _ _ y] (get-in @lst/ui-state [:fig-rects line-id])
+                (let [[x y] (get-in @lst/ui-state [:line-positions line-id])
                       line (get lines line-id)
                       tag (if-not (get supress-tags? current-verse)
                             (dd/get-momentary-tag line-id current-tags lines blank-chars)
