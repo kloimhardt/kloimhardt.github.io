@@ -100,15 +100,13 @@
      (map-indexed (fn [idx line-id]
                     [line-id
                      [left-margin-poem
-                      (+ arrow-y
-                         (* psize (inc idx)))]])
+                      (* psize (inc idx))]])
                   line-ids)
      :tag-initial-positions
      (map (fn [tag-id]
             [tag-id
              [left-margin-tags
-              (+ arrow-y
-                 (* psize (count line-ids))
+              (+ (* psize (inc (count line-ids)))
                  (* tag-height tag-distance
                     (get-in lines [tag-id :tag-sort-idx])))]])
           tag-ids)

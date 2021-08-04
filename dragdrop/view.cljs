@@ -80,7 +80,7 @@
    [:rect {:x 0, :y 0, :width "100%", :height "100%"
            :fill (:fill-color lst/config) :ref (fn [el] (when el (dd/dragarea el)))}]
    [plot-tag-rects current-tags tag-positions]
-   [plot-title current-verse]
+   ;;[plot-title current-verse]
    [plot-poem current-verse current-tags supress-tags?]
    (if (get supress-tags? current-verse)
      [plot-next-button]
@@ -104,9 +104,27 @@
           ^{:key p-idx}
           [:p
            [:a {:on-click #(do (dd/go-to-verse [ui-category p-idx 0])
-                               (st/set-category nil))}
+                               (st/set-category nil)
+                               (st/set-show-content false))}
             (dd/get-poem-title (:lines lst/config) ui-category p-idx)]])
         (range (count (get (:verse-lengths lst/config) ui-category))))])
+
+(defn content []
+  [:<>
+   [:button.button {:on-click #(st/set-show-content false)} "Back"]
+   [:<>
+    (let [nof-categories (count (:verse-lengths lst/config))]
+      (map (fn [category-idx] ^{:key category-idx}
+             [:<>
+              [:p (dd/get-category-name (:lines lst/config) category-idx)]
+              [list-poems-for-category category-idx]]) (range nof-categories)))]])
+
+(defn content-button [current-verse]
+  [:<>
+   [:span (dd/get-poem-title (:lines lst/config) (first current-verse) (second current-verse))]
+   [:button.button {:on-click #(dd/go-to-verse (dd/dec-verse (:current-verse @st/r-state)))} "<"]
+   [:button.button {:on-click #(dd/go-to-verse (dd/inc-verse (:current-verse @st/r-state)))} ">"]
+   [:button.button {:on-click #(st/set-show-content true)} "Content"]])
 
 (defn dbg-state []
   [:div
@@ -118,7 +136,17 @@
   (fn []
     (pc "main")
     [:div
-     (if-let [category-idx (:current-category @st/r-state)]
+     (if (:show-content @st/r-state)
+       [content]
+       (let [current-verse (:current-verse @st/r-state)
+             current-tags (:current-tags @st/r-state)
+             tag-positions (:tag-positions @st/r-state)
+             supress-tags? (:supress-tags? @st/r-state)]
+         [:<>
+          [content-button current-verse]
+          [svg-canvas current-verse current-tags tag-positions supress-tags?]])
+       )
+     #_(if-let [category-idx (:current-category @st/r-state)]
        [:<>
         [:button.button {:on-click #(st/set-category nil)} "Back"]
         (if (= "State" (dd/get-category-name (:lines lst/config) category-idx))
