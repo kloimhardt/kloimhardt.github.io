@@ -144,11 +144,12 @@
 (defn get-poem-title [lines category-idx title-idx]
   (get-in lines [[category-idx title-idx 0 -1] :part1]))
 
-(defn poem-correct? [current-tags]
+(defn poem-correct? [line-ids current-tags]
   (every? true?
-          (map (fn [[line-id tag-id]]
-                 (= line-id tag-id))
-               current-tags)))
+          (map (fn [id]
+                 (let [current-tag-id (get current-tags id)]
+                   (if current-tag-id (= id current-tag-id) true)))
+               line-ids)))
 
 (defn add-duple-to-matrix [duple matrix]
   (map #(map + %1 %2) matrix (repeat duple)))

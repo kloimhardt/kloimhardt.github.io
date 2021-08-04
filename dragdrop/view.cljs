@@ -36,16 +36,18 @@
               line-ids)]))))
 
 (defn plot-tag-rects [& _]
-  (let [{:keys [tag-height line-height tag-rect-fill-color tag-rect-width]} lst/config]
-    (fn [current-verse tag-positions]
+  (let [{:keys [tag-height line-height tag-rect-fill-color-light tag-rect-fill-color-dark tag-rect-width]} lst/config]
+    (fn [current-verse tag-positions current-tags]
       (pc "plot-tags")
-      (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
+      (let [line-ids (dd/get-lines-for-verse lst/config current-verse)
+            color (if (dd/poem-correct? line-ids current-tags) tag-rect-fill-color-light tag-rect-fill-color-dark)]
         [:<>
          (map (fn [line-id]
                 (let [[_x y] (get tag-positions line-id)]
                   (when y
                     ^{:key line-id}
-                    [:rect {:x 0 :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height :fill tag-rect-fill-color
+                    [:rect {:x 0 :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height
+                            :fill color
                             :ref (fn [el] (when el (dd/make-draggable el line-id)))}])))
               line-ids)]))))
 
@@ -79,7 +81,7 @@
   [:svg {:width "100%" :height "100%"}
    [:rect {:x 0, :y 0, :width "100%", :height "100%"
            :fill (:fill-color lst/config) :ref (fn [el] (when el (dd/dragarea el)))}]
-   [plot-tag-rects current-verse tag-positions]
+   [plot-tag-rects current-verse tag-positions current-tags]
    [plot-poem current-verse current-tags]
    [plot-tags current-verse tag-positions]])
 
