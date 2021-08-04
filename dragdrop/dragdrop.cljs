@@ -28,6 +28,12 @@
       (lst/set-current-tag-offset (- x mx) (- y my)))))
 
 (defn end-drag [_e]
+  (run! (fn [[line-id tag-id]]
+          (when (= tag-id (:current-id @lst/ui-state))
+            (let [x (get-in @lst/ui-state [:tag-x-positions line-id])
+                  [_ y] (get-in @lst/ui-state [:line-positions line-id])]
+              (st/set-tag-pos tag-id x y))))
+        (:current-tags @st/r-state))
   (lst/set-current-tag-id nil))
 
 (defn get-line-id-when-pos-in-line [y line-height]

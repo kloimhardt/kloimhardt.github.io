@@ -21,7 +21,7 @@
              :on-click #(dd/go-to-verse (dd/dec-verse (:current-verse @st/r-state)))}])
 
 (defn plot-tags [& _]
-  (let [{:keys [lines line-height]} lst/config]
+  (let [{:keys [lines line-height tag-text-color]} lst/config]
     (fn [current-tags tag-positions]
       (pc "plot-tags")
       [:<>
@@ -29,7 +29,7 @@
               (let [[x y] (get tag-positions line-id)]
                 ^{:key line-id}
                 [:text {:x x :y y :ref (fn [el] (when el (dd/make-draggable el line-id)))
-                        :style {:cursor :move} :font-size line-height}
+                        :style {:cursor :move} :font-size line-height :fill tag-text-color}
                  (get-in lines [line-id :tag])]))
             (keys current-tags))])))
 
@@ -41,7 +41,7 @@
        (map (fn [line-id]
               (let [[x y] (get tag-positions line-id)]
                 ^{:key line-id}
-                [:rect {:x x :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height :fill "blue"
+                [:rect {:x x :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height :fill fill-color
                         :ref (fn [el] (when el (dd/make-draggable el line-id)))}]
                 ))
             (keys current-tags))])))
