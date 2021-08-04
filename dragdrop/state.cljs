@@ -26,6 +26,3 @@
 
 (defn set-display-type [type]
   (swap! r-state assoc :display-type type))
-
-(defn set-supress-tags [verse-vec bool]
-  (swap! r-state assoc-in [:supress-tags? verse-vec] bool))

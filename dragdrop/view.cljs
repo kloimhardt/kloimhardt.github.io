@@ -36,32 +36,29 @@
               line-ids)]))))
 
 (defn plot-tag-rects [& _]
-  (let [{:keys [tag-height line-height fill-color tag-rect-width]} lst/config]
+  (let [{:keys [tag-height line-height tag-rect-fill-color tag-rect-width]} lst/config]
     (fn [current-verse tag-positions]
       (pc "plot-tags")
       (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
         [:<>
          (map (fn [line-id]
-                (let [[x y] (get tag-positions line-id)]
-                  (when x
+                (let [[_x y] (get tag-positions line-id)]
+                  (when y
                     ^{:key line-id}
-                    [:rect {:x x :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height :fill fill-color
+                    [:rect {:x 0 :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height :fill tag-rect-fill-color
                             :ref (fn [el] (when el (dd/make-draggable el line-id)))}])))
               line-ids)]))))
 
 (defn plot-poem [& _]
   (let [{:keys [lines line-height blank-chars]} lst/config]
-    (fn [current-verse current-tags supress-tags?]
+    (fn [current-verse current-tags]
       (pc "plot-poem")
-      (when (dd/poem-correct? current-tags) (st/set-supress-tags current-verse true))
       (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
         [:<>
          (map (fn [line-id]
                 (let [[x y] (get-in @lst/ui-state [:line-positions line-id])
                       line (get lines line-id)
-                      tag (if-not (get supress-tags? current-verse)
-                            (dd/get-momentary-tag line-id current-tags lines blank-chars)
-                            (:tag line))
+                      tag (dd/get-momentary-tag line-id current-tags lines blank-chars)
                       {:keys [part1 part2]} line
                       str-line (str part1 (when part1 " ") tag " " part2)]
                   ^{:key line-id}
@@ -77,13 +74,13 @@
     (fn [current-verse]
       [:text {:x x :y h :font-size h} (dd/get-poem-title (:lines lst/config) (first current-verse) (second current-verse))])))
 
-(defn svg-canvas [current-verse current-tags tag-positions supress-tags?]
+(defn svg-canvas [current-verse current-tags tag-positions]
   (pc "svg-canvas")
   [:svg {:width "100%" :height "100%"}
    [:rect {:x 0, :y 0, :width "100%", :height "100%"
            :fill (:fill-color lst/config) :ref (fn [el] (when el (dd/dragarea el)))}]
    [plot-tag-rects current-verse tag-positions]
-   [plot-poem current-verse current-tags supress-tags?]
+   [plot-poem current-verse current-tags]
    [plot-tags current-verse tag-positions]])
 
 (defn categories []
@@ -144,8 +141,7 @@
        :state [dbg-state]
        (let [current-verse (:current-verse @st/r-state)
              current-tags (:current-tags @st/r-state)
-             tag-positions (:tag-positions @st/r-state)
-             supress-tags? (:supress-tags? @st/r-state)]
+             tag-positions (:tag-positions @st/r-state)]
          [:<>
           [menu-bar current-verse]
-          [svg-canvas current-verse current-tags tag-positions supress-tags?]]))]))
+          [svg-canvas current-verse current-tags tag-positions]]))]))

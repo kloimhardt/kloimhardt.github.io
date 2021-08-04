@@ -27,7 +27,8 @@
 
 (def line-height 20)
 (def line-distance 2)
-(def l-state (volatile! {:fill-color "#fafafa"
+(def l-state (volatile! {:fill-color "white"
+                         :tag-rect-fill-color "#fafafa"
                          :tag-text-color nil
                          :blank-chars "__"
                          :line-height line-height
