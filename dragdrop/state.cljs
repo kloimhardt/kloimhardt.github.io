@@ -24,8 +24,8 @@
 (defn set-category [category]
   (swap! r-state assoc :current-category category))
 
-(defn set-show-content [bool]
-  (swap! r-state assoc :show-content bool))
+(defn set-display-type [type]
+  (swap! r-state assoc :display-type type))
 
 (defn set-supress-tags [verse-vec bool]
   (swap! r-state assoc-in [:supress-tags? verse-vec] bool))

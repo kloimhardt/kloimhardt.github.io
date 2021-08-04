@@ -6,10 +6,10 @@
   ist weiser ;; ist 2
   als Mirakulix.
 
-  Sie hingegen war,
-  soweit auf der Seite sichtbar, 
+  Sie hingegen war, ;; war 1
+  soweit auf der Seite sichtbar, ;; soweit 2
   frisch
-  und glatt rasiert.
+  und glatt rasiert. ;; glatt 3
   - Ich sage zu dir,
   schreibt sie,
   das atomare Chaos

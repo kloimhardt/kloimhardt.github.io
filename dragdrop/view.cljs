@@ -22,29 +22,32 @@
 
 (defn plot-tags [& _]
   (let [{:keys [lines line-height tag-text-color]} lst/config]
-    (fn [current-tags tag-positions]
+    (fn [current-verse tag-positions]
       (pc "plot-tags")
-      [:<>
-       (map (fn [line-id]
-              (let [[x y] (get tag-positions line-id)]
-                ^{:key line-id}
-                [:text {:x x :y y :ref (fn [el] (when el (dd/make-draggable el line-id)))
-                        :style {:cursor :move} :font-size line-height :fill tag-text-color}
-                 (get-in lines [line-id :tag])]))
-            (keys current-tags))])))
+      (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
+        [:<>
+         (map (fn [line-id]
+                (let [[x y] (get tag-positions line-id)]
+                  (when x
+                    ^{:key line-id}
+                    [:text {:x x :y y :ref (fn [el] (when el (dd/make-draggable el line-id)))
+                            :style {:cursor :move} :font-size line-height :fill tag-text-color}
+                     (get-in lines [line-id :tag])])))
+              line-ids)]))))
 
 (defn plot-tag-rects [& _]
   (let [{:keys [tag-height line-height fill-color tag-rect-width]} lst/config]
-    (fn [current-tags tag-positions]
+    (fn [current-verse tag-positions]
       (pc "plot-tags")
-      [:<>
-       (map (fn [line-id]
-              (let [[x y] (get tag-positions line-id)]
-                ^{:key line-id}
-                [:rect {:x x :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height :fill fill-color
-                        :ref (fn [el] (when el (dd/make-draggable el line-id)))}]
-                ))
-            (keys current-tags))])))
+      (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
+        [:<>
+         (map (fn [line-id]
+                (let [[x y] (get tag-positions line-id)]
+                  (when x
+                    ^{:key line-id}
+                    [:rect {:x x :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height :fill fill-color
+                            :ref (fn [el] (when el (dd/make-draggable el line-id)))}])))
+              line-ids)]))))
 
 (defn plot-poem [& _]
   (let [{:keys [lines line-height blank-chars]} lst/config]
@@ -79,14 +82,9 @@
   [:svg {:width "100%" :height "100%"}
    [:rect {:x 0, :y 0, :width "100%", :height "100%"
            :fill (:fill-color lst/config) :ref (fn [el] (when el (dd/dragarea el)))}]
-   [plot-tag-rects current-tags tag-positions]
-   ;;[plot-title current-verse]
+   [plot-tag-rects current-verse tag-positions]
    [plot-poem current-verse current-tags supress-tags?]
-   (if (get supress-tags? current-verse)
-     [plot-next-button]
-     [plot-tags current-tags tag-positions])
-   (when (get supress-tags? (dd/dec-verse current-verse))
-     [plot-prev-button])])
+   [plot-tags current-verse tag-positions]])
 
 (defn categories []
   (let [nof-categories (count (:verse-lengths lst/config))]
@@ -105,13 +103,16 @@
           [:p
            [:a {:on-click #(do (dd/go-to-verse [ui-category p-idx 0])
                                (st/set-category nil)
-                               (st/set-show-content false))}
+                               (st/set-display-type :poem))}
             (dd/get-poem-title (:lines lst/config) ui-category p-idx)]])
         (range (count (get (:verse-lengths lst/config) ui-category))))])
 
+(defn back-button []
+  [:button.button {:on-click #(st/set-display-type :poem)} "Back"])
+
 (defn content []
   [:<>
-   [:button.button {:on-click #(st/set-show-content false)} "Back"]
+   [back-button]
    [:<>
     (let [nof-categories (count (:verse-lengths lst/config))]
       (map (fn [category-idx] ^{:key category-idx}
@@ -119,15 +120,17 @@
               [:p (dd/get-category-name (:lines lst/config) category-idx)]
               [list-poems-for-category category-idx]]) (range nof-categories)))]])
 
-(defn content-button [current-verse]
+(defn menu-bar [current-verse]
   [:<>
    [:span (dd/get-poem-title (:lines lst/config) (first current-verse) (second current-verse))]
    [:button.button {:on-click #(dd/go-to-verse (dd/dec-verse (:current-verse @st/r-state)))} "<"]
    [:button.button {:on-click #(dd/go-to-verse (dd/inc-verse (:current-verse @st/r-state)))} ">"]
-   [:button.button {:on-click #(st/set-show-content true)} "Content"]])
+   [:button.button {:on-click #(st/set-display-type :content)} "Content"]
+   [:button.button {:on-click #(st/set-display-type :state)} "State"]])
 
 (defn dbg-state []
   [:div
+   [back-button]
    [:p (str @st/r-state)]
    [:p (str @lst/ui-state)]])
 
@@ -136,26 +139,13 @@
   (fn []
     (pc "main")
     [:div
-     (if (:show-content @st/r-state)
-       [content]
+     (case (:display-type @st/r-state)
+       :content [content]
+       :state [dbg-state]
        (let [current-verse (:current-verse @st/r-state)
              current-tags (:current-tags @st/r-state)
              tag-positions (:tag-positions @st/r-state)
              supress-tags? (:supress-tags? @st/r-state)]
          [:<>
-          [content-button current-verse]
-          [svg-canvas current-verse current-tags tag-positions supress-tags?]])
-       )
-     #_(if-let [category-idx (:current-category @st/r-state)]
-       [:<>
-        [:button.button {:on-click #(st/set-category nil)} "Back"]
-        (if (= "State" (dd/get-category-name (:lines lst/config) category-idx))
-          [dbg-state]
-          [list-poems-for-category category-idx])]
-       (let [current-verse (:current-verse @st/r-state)
-             current-tags (:current-tags @st/r-state)
-             tag-positions (:tag-positions @st/r-state)
-             supress-tags? (:supress-tags? @st/r-state)]
-         [:<>
-          [categories]
+          [menu-bar current-verse]
           [svg-canvas current-verse current-tags tag-positions supress-tags?]]))]))

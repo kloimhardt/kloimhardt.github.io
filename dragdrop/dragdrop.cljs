@@ -88,8 +88,10 @@
         line-positions))
 
 (defn set-tag-positions! [tag-initial-positions]
-  (st/clear-tag-positions)
-  (run! (fn [[tag-id [x y]]] (st/set-tag-pos tag-id x y))
+  ;;(st/clear-tag-positions)
+  (run! (fn [[tag-id [x y]]]
+          (when-not (get-in @st/r-state [:tag-positions tag-id])
+            (st/set-tag-pos tag-id x y)))
         tag-initial-positions))
 
 (defn all-positions [line-ids tag-ids]
@@ -119,6 +121,10 @@
   (map (fn [line-idx] [category poem verse line-idx])
        (range (get-in (:verse-lengths config) [category poem verse]))))
 
+(defn set-tag-to-blank-for-new-lines [line-ids]
+  (let [new-blank-lines (into {} (map (fn[id] [id :blank]) line-ids))]
+    (swap! st/r-state update :current-tags #(merge new-blank-lines %))))
+
 (defn go-to-verse [verse-vec]
   (let [line-ids (get-lines-for-verse lst/config verse-vec)
         tag-ids (filter #(:tag (get (:lines lst/config) %)) line-ids)
@@ -129,9 +135,8 @@
     (lst/set-left-arrow-position left-arrow-position)
     (lst/set-right-arrow-position right-arrow-position)
     (st/set-verse verse-vec)
-    (st/set-tag-to-blank-for-lines tag-ids)
+    (set-tag-to-blank-for-new-lines tag-ids)
     (set-tag-positions! tag-initial-positions)))
-
 
 (defn get-category-name [lines category-idx]
   (get-in lines [[category-idx -1 0 -1] :part1]))
