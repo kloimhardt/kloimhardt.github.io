@@ -16,10 +16,6 @@
   (.log js/console x)
   x)
 
-#_(defn get-mouse-positon [e]
-    (let [evt (if-let [t (.-touches e)] (first t) e)]
-      [(.-clientX evt) (.-clientY evt)]))
-
 (defn get-mouse-positon [e]
   (let [evt (or (first (.-touches e)) e)]
     [(.-clientX evt) (.-clientY evt)]))
@@ -34,6 +30,9 @@
 
 (defn is-swipe [mouse-position start-position] true)
 
+(defn is-click [mouse-position start-position]
+  (every? true? (map #(= %1 %2) mouse-position start-position)))
+
 (defn end-drag [e]
   (p "end-drag")
   (if (:current-id @lst/ui-state)
@@ -44,7 +43,9 @@
                       [_ y] (get-in @lst/ui-state [:line-positions line-id])]
                   (st/set-tag-pos tag-id x y))))
             (:current-tags @st/r-state))
-      (lst/set-current-tag-id nil))
+      (lst/set-current-tag-id nil)
+      (when (is-click (get-mouse-positon e) (:swipe-start-position @lst/ui-state))
+        (.log js/console "click")))
     (when (is-swipe (get-mouse-positon e) (:swipe-start-position @lst/ui-state))
       (.log js/console "swipe")))
   (lst/set-swipe-start-position nil))
