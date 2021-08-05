@@ -1,5 +1,7 @@
 (ns view
-  (:require [state :as st]
+  (:require [reagent.core :as rcore]
+            [reagent.dom :as rdom]
+            [state :as st]
             [lstate :as lst]
             [dragdrop :as dd]
             [clojure.string :as s]))

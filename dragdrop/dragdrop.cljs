@@ -16,25 +16,44 @@
   (.log js/console x)
   x)
 
-(defn get-mouse-positon [e]
+#_(defn get-mouse-positon [e]
   (let [evt (if-let [t (.-touches e)] (first t) e)]
+    [(.-clientX evt) (.-clientY evt)]))
+
+(defn get-mouse-positon [e]
+  (let [evt (or (first (.-touches e)) e)]
     [(.-clientX evt) (.-clientY evt)]))
 
 (defn start-drag [id]
   (fn [e]
+    (p "start-drag")
     (lst/set-current-tag-id id)
     (let [[x y] (get-in @st/r-state [:tag-positions id])
           [mx my] (get-mouse-positon e)]
       (lst/set-current-tag-offset (- x mx) (- y my)))))
 
-(defn end-drag [_e]
-  (run! (fn [[line-id tag-id]]
-          (when (= tag-id (:current-id @lst/ui-state))
-            (let [x (get-in @lst/ui-state [:tag-x-positions line-id])
-                  [_ y] (get-in @lst/ui-state [:line-positions line-id])]
-              (st/set-tag-pos tag-id x y))))
-        (:current-tags @st/r-state))
-  (lst/set-current-tag-id nil))
+(defn is-swipe [mouse-position start-position] true)
+
+(defn end-drag [e]
+  (p "end-drag")
+  (cond
+    (:current-id @lst/ui-state)
+    (do
+      (run! (fn [[line-id tag-id]]
+              (when (= tag-id (:current-id @lst/ui-state))
+                (let [x (get-in @lst/ui-state [:tag-x-positions line-id])
+                      [_ y] (get-in @lst/ui-state [:line-positions line-id])]
+                  (st/set-tag-pos tag-id x y))))
+            (:current-tags @st/r-state))
+      (lst/set-current-tag-id nil))
+
+    (:swipe-start-position @lst/ui-state)
+    (do
+      (lst/set-swipe-start-position nil)
+      (when (is-swipe (get-mouse-positon e) (:swipe-start-position @lst/ui-state))
+        (.log js/console "swipe")))
+
+    ))
 
 (defn get-line-id-when-pos-in-line [y line-height]
   (->> (:line-positions @lst/ui-state)
@@ -58,12 +77,19 @@
         (when-let [line-id (first (get-lines-for-tag-id (:current-tags @st/r-state) tag-id))]
           (st/set-line-tag-id line-id :blank))))))
 
+(defn start-swipe [el]
+  (p "start-swip")
+  (lst/set-swipe-start-position (get-mouse-positon el)))
+
 (defn dragarea [el]
   (doto el
     (.addEventListener "mousemove" drag)
     (.addEventListener "touchmove" drag)
     (.addEventListener "mouseup" end-drag)
     (.addEventListener "touchend" end-drag)
+    ;;(.addEventListener "mousedown" start-swipe)
+    ;;(.addEventListener "touchstart" start-swipe)
+
     #_(.addEventListener "touchleave" end-drag)
     #_(.addEventListener "touchcancel" end-drag)
     #_(.addEventListener "mouseleave" end-drag)))

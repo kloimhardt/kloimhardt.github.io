@@ -25,6 +25,9 @@
 (defn set-right-arrow-position [pos]
   (vswap! ui-state assoc :right-arrow-position pos))
 
+(defn set-swipe-start-position [pos]
+  (vswap! ui-state assoc :swipe-start-position pos))
+
 (def line-height 20)
 (def line-distance 2)
 (def l-state (volatile! {:fill-color "white"
