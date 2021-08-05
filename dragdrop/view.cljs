@@ -53,24 +53,37 @@
                             :ref (fn [el] (when el (dd/make-draggable el line-id)))}])))
               line-ids)]))))
 
-(defn plot-poem [& _]
+(defn plot-line []
   (let [{:keys [lines line-height blank-chars]} lst/config]
-    (fn [current-verse current-tags]
-      (pc "plot-poem")
-      (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
-        [:<>
-         (map (fn [line-id]
-                (let [[x y] (get-in @lst/ui-state [:line-positions line-id])
-                      line (get lines line-id)
-                      tag (dd/get-momentary-tag line-id current-tags lines blank-chars)
-                      {:keys [part1 part2]} line
-                      str-line (str part1 (when part1 " ") tag " " part2)]
-                  ^{:key line-id}
-                  [:text {:x x :y y :font-size line-height
-                          :ref (fn[el] (when (and el (not (get-in @lst/ui-state [:tag-x-positions line-id])))
-                                         (lst/set-tag-x-position line-id (.-x (.getStartPositionOfChar el (if (and part1 tag) (inc (count part1)) 0))))))}
-                   str-line]))
-              line-ids)]))))
+    (rcore/create-class
+      {:component-did-mount
+       (fn[] nil)
+       #_(fn [this]
+         (fn[el] (when (not (get-in @lst/ui-state [:tag-x-positions line-id]))
+                   (lst/set-tag-x-position line-id (.-x (.getStartPositionOfChar el (if (and part1 tag) (inc (count part1)) 0))))))
+
+         nil)
+       :reagent-render
+       (fn [line-id current-tags]
+         (let [[x y] (get-in @lst/ui-state [:line-positions line-id])
+               line (get lines line-id)
+               tag (dd/get-momentary-tag line-id current-tags lines blank-chars)
+               {:keys [part1 part2]} line
+               str-line (str part1 (when part1 " ") tag " " part2)]
+           [:text {:x x :y y :font-size line-height
+                   :ref (fn[el] (when (and el (not (get-in @lst/ui-state [:tag-x-positions line-id])))
+                                  (lst/set-tag-x-position line-id (.-x (.getStartPositionOfChar el (if (and part1 tag) (inc (count part1)) 0))))))}
+            str-line]))})))
+
+(defn plot-poem [& _]
+  (fn [current-verse current-tags]
+    (pc "plot-poem")
+    (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
+      [:<>
+       (map (fn [line-id]
+              ^{:key line-id}
+              [plot-line line-id current-tags])
+            line-ids)])))
 
 (defn plot-title [_]
   (let [x (:left-margin-poem lst/config)
@@ -78,19 +91,16 @@
     (fn [current-verse]
       [:text {:x x :y h :font-size h} (dd/get-poem-title (:lines lst/config) (first current-verse) (second current-verse))])))
 
-(defn svg-canvas [current-verse current-tags tag-positions]
+(defn svg-canvas [& _]
   (pc "svg-canvas")
   (rcore/create-class
     {:component-did-mount
-     (fn [this] nil #_(dd/dragarea (rdom/dom-node this)))
-
+     (fn [this] (dd/dragarea (rdom/dom-node this)))
      :reagent-render
      (fn [current-verse current-tags tag-positions]
        [:svg {:width "100%" :height "100%"}
         [:rect {:x 0, :y 0, :width "100%", :height "100%"
-                :fill (:fill-color lst/config)
-                :ref (fn [el] (when el (dd/dragarea el)))
-                }]
+                :fill (:fill-color lst/config)}]
         [plot-tag-rects current-verse tag-positions current-tags]
         [plot-poem current-verse current-tags]
         [plot-tags current-verse tag-positions]])}))
