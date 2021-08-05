@@ -80,12 +80,20 @@
 
 (defn svg-canvas [current-verse current-tags tag-positions]
   (pc "svg-canvas")
-  [:svg {:width "100%" :height "100%"}
-   [:rect {:x 0, :y 0, :width "100%", :height "100%"
-           :fill (:fill-color lst/config) :ref (fn [el] (when el (dd/dragarea el)))}]
-   [plot-tag-rects current-verse tag-positions current-tags]
-   [plot-poem current-verse current-tags]
-   [plot-tags current-verse tag-positions]])
+  (rcore/create-class
+    {:component-did-mount
+     (fn [this] nil #_(dd/dragarea (rdom/dom-node this)))
+
+     :reagent-render
+     (fn [current-verse current-tags tag-positions]
+       [:svg {:width "100%" :height "100%"}
+        [:rect {:x 0, :y 0, :width "100%", :height "100%"
+                :fill (:fill-color lst/config)
+                :ref (fn [el] (when el (dd/dragarea el)))
+                }]
+        [plot-tag-rects current-verse tag-positions current-tags]
+        [plot-poem current-verse current-tags]
+        [plot-tags current-verse tag-positions]])}))
 
 (defn categories []
   (let [nof-categories (count (:verse-lengths lst/config))]
