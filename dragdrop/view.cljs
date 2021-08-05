@@ -22,11 +22,18 @@
                                              (:left-arrow lst/config))
              :on-click #(dd/go-to-verse (dd/dec-verse (:current-verse @st/r-state)))}])
 
-(defn plot-tag [line-id x y]
-  (let [{:keys [lines line-height tag-text-color]} lst/config]
-    [:text {:x x :y y :ref (fn [el] (when el (dd/make-draggable el line-id)))
-            :style {:cursor :move} :font-size line-height :fill tag-text-color}
-     (get-in lines [line-id :tag])]))
+(defn plot-tag [& _]
+  (rcore/create-class
+    {:component-did-mount
+     (fn [this]
+       (let [[_ line-id _x _y] (rcore/argv this)]
+         (dd/make-draggable (rdom/dom-node this) line-id)))
+     :reagent-render
+     (fn [line-id x y]
+       (let [{:keys [lines line-height tag-text-color]} lst/config]
+         [:text {:x x :y y
+                 :style {:cursor :move} :font-size line-height :fill tag-text-color}
+          (get-in lines [line-id :tag])]))}))
 
 (defn plot-tags [& _]
   (fn [current-verse tag-positions]

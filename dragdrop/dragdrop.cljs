@@ -17,8 +17,8 @@
   x)
 
 #_(defn get-mouse-positon [e]
-  (let [evt (if-let [t (.-touches e)] (first t) e)]
-    [(.-clientX evt) (.-clientY evt)]))
+    (let [evt (if-let [t (.-touches e)] (first t) e)]
+      [(.-clientX evt) (.-clientY evt)]))
 
 (defn get-mouse-positon [e]
   (let [evt (or (first (.-touches e)) e)]
@@ -36,8 +36,7 @@
 
 (defn end-drag [e]
   (p "end-drag")
-  (cond
-    (:current-id @lst/ui-state)
+  (if (:current-id @lst/ui-state)
     (do
       (run! (fn [[line-id tag-id]]
               (when (= tag-id (:current-id @lst/ui-state))
@@ -46,14 +45,9 @@
                   (st/set-tag-pos tag-id x y))))
             (:current-tags @st/r-state))
       (lst/set-current-tag-id nil))
-
-    (:swipe-start-position @lst/ui-state)
-    (do
-      (lst/set-swipe-start-position nil)
-      (when (is-swipe (get-mouse-positon e) (:swipe-start-position @lst/ui-state))
-        (.log js/console "swipe")))
-
-    ))
+    (when (is-swipe (get-mouse-positon e) (:swipe-start-position @lst/ui-state))
+      (.log js/console "swipe")))
+  (lst/set-swipe-start-position nil))
 
 (defn get-line-id-when-pos-in-line [y line-height]
   (->> (:line-positions @lst/ui-state)
@@ -87,8 +81,8 @@
     (.addEventListener "touchmove" drag)
     (.addEventListener "mouseup" end-drag)
     (.addEventListener "touchend" end-drag)
-    ;;(.addEventListener "mousedown" start-swipe)
-    ;;(.addEventListener "touchstart" start-swipe)
+    (.addEventListener "mousedown" start-swipe)
+    (.addEventListener "touchstart" start-swipe)
 
     #_(.addEventListener "touchleave" end-drag)
     #_(.addEventListener "touchcancel" end-drag)
@@ -97,8 +91,7 @@
 (defn make-draggable [el id]
   (doto el
     (.addEventListener "mousedown" (start-drag id))
-    (.addEventListener "touchstart" (start-drag id))
-    dragarea))
+    (.addEventListener "touchstart" (start-drag id))))
 
 (defn get-momentary-tag [line-id current-tags lines blank-chars]
   (if-let [tag-id (get current-tags line-id)]
