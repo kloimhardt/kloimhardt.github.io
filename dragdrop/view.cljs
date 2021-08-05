@@ -22,23 +22,38 @@
                                              (:left-arrow lst/config))
              :on-click #(dd/go-to-verse (dd/dec-verse (:current-verse @st/r-state)))}])
 
-(defn plot-tags [& _]
+(defn plot-tag [line-id x y]
   (let [{:keys [lines line-height tag-text-color]} lst/config]
-    (fn [current-verse tag-positions]
-      (pc "plot-tags")
-      (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
-        [:<>
-         (map (fn [line-id]
-                (let [[x y] (get tag-positions line-id)]
-                  (when x
-                    ^{:key line-id}
-                    [:text {:x x :y y :ref (fn [el] (when el (dd/make-draggable el line-id)))
-                            :style {:cursor :move} :font-size line-height :fill tag-text-color}
-                     (get-in lines [line-id :tag])])))
-              line-ids)]))))
+    [:text {:x x :y y :ref (fn [el] (when el (dd/make-draggable el line-id)))
+            :style {:cursor :move} :font-size line-height :fill tag-text-color}
+     (get-in lines [line-id :tag])]))
+
+(defn plot-tags [& _]
+  (fn [current-verse tag-positions]
+    (pc "plot-tags")
+    (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
+      [:<>
+       (map (fn [line-id]
+              (let [[x y] (get tag-positions line-id)]
+                (when x
+                  ^{:key line-id} [plot-tag line-id x y]
+                  )))
+            line-ids)])))
+
+(defn plot-tag-rect [& _]
+  (let [{:keys [tag-height line-height tag-rect-width]} lst/config]
+    (rcore/create-class
+      {:component-did-mount
+       (fn [this]
+         (let [[_ line-id _y _color] (rcore/argv this)]
+           (dd/make-draggable (rdom/dom-node this) line-id)))
+       :reagent-render
+       (fn [_line-id y color]
+         [:rect {:x 0 :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height
+                 :fill color :style {:cursor :move}}])})))
 
 (defn plot-tag-rects [& _]
-  (let [{:keys [tag-height line-height tag-rect-fill-color-light tag-rect-fill-color-dark tag-rect-width]} lst/config]
+  (let [{:keys [tag-rect-fill-color-light tag-rect-fill-color-dark]} lst/config]
     (fn [current-verse tag-positions current-tags]
       (pc "plot-tags")
       (let [line-ids (dd/get-lines-for-verse lst/config current-verse)
@@ -47,22 +62,20 @@
          (map (fn [line-id]
                 (let [[_x y] (get tag-positions line-id)]
                   (when y
-                    ^{:key line-id}
-                    [:rect {:x 0 :y (+ (- y tag-height) (/ line-height 2)) :width tag-rect-width :height tag-height
-                            :fill color
-                            :ref (fn [el] (when el (dd/make-draggable el line-id)))}])))
+                    ^{:key line-id} [plot-tag-rect line-id y color])))
               line-ids)]))))
 
-(defn plot-line []
+(defn plot-line [& _]
   (let [{:keys [lines line-height blank-chars]} lst/config]
     (rcore/create-class
       {:component-did-mount
-       (fn[] nil)
-       #_(fn [this]
-         (fn[el] (when (not (get-in @lst/ui-state [:tag-x-positions line-id]))
-                   (lst/set-tag-x-position line-id (.-x (.getStartPositionOfChar el (if (and part1 tag) (inc (count part1)) 0))))))
-
-         nil)
+       (fn [this]
+         (let [[_ line-id current-tags] (rcore/argv this)
+               el (rdom/dom-node this)
+               line (get lines line-id)
+               tag (dd/get-momentary-tag line-id current-tags lines blank-chars)
+               {:keys [part1]} line]
+           (lst/set-tag-x-position line-id (.-x (.getStartPositionOfChar el (if (and part1 tag) (inc (count part1)) 0))))))
        :reagent-render
        (fn [line-id current-tags]
          (let [[x y] (get-in @lst/ui-state [:line-positions line-id])
@@ -70,9 +83,7 @@
                tag (dd/get-momentary-tag line-id current-tags lines blank-chars)
                {:keys [part1 part2]} line
                str-line (str part1 (when part1 " ") tag " " part2)]
-           [:text {:x x :y y :font-size line-height
-                   :ref (fn[el] (when (and el (not (get-in @lst/ui-state [:tag-x-positions line-id])))
-                                  (lst/set-tag-x-position line-id (.-x (.getStartPositionOfChar el (if (and part1 tag) (inc (count part1)) 0))))))}
+           [:text {:x x :y y :font-size line-height}
             str-line]))})))
 
 (defn plot-poem [& _]
