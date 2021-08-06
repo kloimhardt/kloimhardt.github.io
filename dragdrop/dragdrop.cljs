@@ -20,11 +20,14 @@
   (let [evt (or (first (.-touches e)) e)]
     [(.-clientX evt) (.-clientY evt)]))
 
+(defn get-actual-tag-positions [r-state]
+  (merge (:tag-positions r-state) (:moved-tag-positions r-state)))
+
 (defn start-drag [id]
   (fn [e]
     (p "start-drag")
     (lst/set-current-tag-id id)
-    (let [[x y] (get-in @st/r-state [:tag-positions id])
+    (let [[x y] (get (get-actual-tag-positions @st/r-state) id)
           [mx my] (get-mouse-positon e)]
       (lst/set-current-tag-offset (- x mx) (- y my)))))
 
@@ -108,9 +111,8 @@
         line-positions))
 
 (defn set-tag-positions! [tag-initial-positions]
-  ;;(st/clear-tag-positions)
   (run! (fn [[tag-id [x y]]]
-          (when-not (get-in @st/r-state [:tag-positions tag-id])
+          (when-not (get (get-actual-tag-positions @st/r-state) tag-id)
             (st/set-tag-pos tag-id x y)))
         tag-initial-positions))
 

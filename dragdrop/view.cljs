@@ -181,7 +181,7 @@
        :state [dbg-state]
        (let [current-verse (:current-verse @st/r-state)
              current-tags (:current-tags @st/r-state)
-             tag-positions (:tag-positions @st/r-state)]
+             tag-positions (dd/get-actual-tag-positions @st/r-state)]
          [:<>
           [menu-bar current-verse]
           [svg-canvas current-verse current-tags tag-positions]]))]))

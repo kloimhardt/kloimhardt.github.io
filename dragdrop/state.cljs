@@ -18,8 +18,8 @@
 (defn set-tag-pos [id x y]
   (swap! r-state assoc-in [:tag-positions id] [x y]))
 
-(defn clear-tag-positions []
-  (swap! r-state dissoc :tag-positions))
+(defn set-moved-tag-pos [id x y]
+  (swap! r-state assoc-in [:moved-tag-positions id] [x y]))
 
 (defn set-category [category]
   (swap! r-state assoc :current-category category))
