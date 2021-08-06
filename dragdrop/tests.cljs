@@ -21,11 +21,15 @@
 
 (rp/get-file "poems.org" hu)
 
-
 (defn print-states []
   (p @lst/l-state)
   (p @lst/ui-state)
   (p @st/r-state)
+  (ps (:tag-positions @st/r-state))
+  (ps
+    (let [{:keys [tag-height tag-distance]} lst/config]
+      (into {} (map (fn [[id [x y]]] [id [x (- y (* tag-height tag-distance))]]) (:tag-positions @st/r-state))))
+    )
   )
 
 (js/setTimeout print-states 300)

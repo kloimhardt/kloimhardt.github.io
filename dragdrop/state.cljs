@@ -26,3 +26,8 @@
 
 (defn set-display-type [type]
   (swap! r-state assoc :display-type type))
+
+(defn shift-tag-positions [tag-height tag-distance]
+  (update r-state
+          :tag-positions
+          #(into {} (map (fn [[id [x y]]] [id [x (- y (* tag-height tag-distance))]]) %))))

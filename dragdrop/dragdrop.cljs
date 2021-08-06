@@ -39,13 +39,14 @@
 (defn end-drag [e]
   (p "end-drag")
   (if (:current-id @lst/ui-state)
-    (do
+    (let [{:keys [tag-height tag-distance]} lst/config]
       (run! (fn [[line-id tag-id]]
               (when (= tag-id (:current-id @lst/ui-state))
                 (let [x (get-in @lst/ui-state [:tag-x-positions line-id])
                       [_ y] (get-in @lst/ui-state [:line-positions line-id])]
-                  (st/set-tag-pos tag-id x y))))
+                  (st/set-moved-tag-pos tag-id x y))))
             (:current-tags @st/r-state))
+      ;;(st/shift-tag-positions tag-height tag-distance)
       (lst/set-current-tag-id nil)
       (when (is-click (get-mouse-positon e) (:swipe-start-position @lst/ui-state))
         (.log js/console "click")))
@@ -68,7 +69,7 @@
           [mx my] (get-mouse-positon e)
           [posx posy] [(+ mx ox) (+ my oy)]
           midy (- posy (/ (:tag-height lst/config) 4))]
-      (st/set-tag-pos tag-id posx posy)
+      (st/set-moved-tag-pos tag-id posx posy)
       (if-let [line-id (get-line-id-when-pos-in-line midy (:line-height lst/config))]
         (when (= (get-in @st/r-state [:current-tags line-id]) :blank)
           (st/set-line-tag-id line-id tag-id))
