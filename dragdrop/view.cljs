@@ -115,13 +115,15 @@
     {:component-did-mount
      (fn [this] (dd/dragarea (rdom/dom-node this)))
      :reagent-render
-     (fn [current-verse current-tags tag-positions]
-       [:svg {:width "100%" :height "100%"}
-        [:rect {:x 0, :y 0, :width "100%", :height "100%"
-                :fill (:fill-color lst/config)}]
-        [plot-tag-rects current-verse tag-positions current-tags]
-        [plot-poem current-verse current-tags]
-        [plot-tags current-verse tag-positions]])}))
+     (fn [current-verse current-tags tag-positions moved-tag-positions]
+       (let [non-movable (apply dissoc tag-positions (keys moved-tag-positions))]
+         [:svg {:width "100%" :height "100%"}
+          [:rect {:x 0, :y 0, :width "100%", :height "100%"
+                  :fill (:fill-color lst/config)}]
+          [plot-tag-rects current-verse moved-tag-positions current-tags]
+          [plot-poem current-verse current-tags]
+          [plot-tags current-verse non-movable]
+          [plot-tags current-verse moved-tag-positions]]))}))
 
 (defn categories []
   (let [nof-categories (count (:verse-lengths lst/config))]
@@ -181,7 +183,8 @@
        :state [dbg-state]
        (let [current-verse (:current-verse @st/r-state)
              current-tags (:current-tags @st/r-state)
-             tag-positions (dd/get-actual-tag-positions @st/r-state)]
+             tag-positions (:tag-positions @st/r-state)
+             moved-tag-positions (:moved-tag-positions @st/r-state)]
          [:<>
           [menu-bar current-verse]
-          [svg-canvas current-verse current-tags tag-positions]]))]))
+          [svg-canvas current-verse current-tags tag-positions moved-tag-positions]]))]))

@@ -36,17 +36,35 @@
 (defn is-click [mouse-position start-position]
   (every? true? (map #(= %1 %2) mouse-position start-position)))
 
+(def get-first-tag
+  (fn [tag-positions]
+    (ffirst (sort-by #(last (second %)) tag-positions))))
+
+(defn add-to-movable! [id tag-positions]
+  (let [[x y] (get tag-positions id)]
+    (st/set-moved-tag-pos id x y)))
+
+(defn get-lines-for-verse [config [category poem verse]]
+  (map (fn [line-idx] [category poem verse line-idx])
+       (range (get-in (:verse-lengths config) [category poem verse]))))
+
 (defn end-drag [e]
   (p "end-drag")
-  (if (:current-id @lst/ui-state)
+  (if-let [curr-id (:current-id @lst/ui-state)]
     (let [{:keys [tag-height tag-distance]} lst/config]
       (run! (fn [[line-id tag-id]]
-              (when (= tag-id (:current-id @lst/ui-state))
+              (when (= tag-id curr-id)
                 (let [x (get-in @lst/ui-state [:tag-x-positions line-id])
-                      [_ y] (get-in @lst/ui-state [:line-positions line-id])]
-                  (st/set-moved-tag-pos tag-id x y))))
+                      [_ y] (get-in @lst/ui-state [:line-positions line-id])
+                      current-verse (:current-verse @st/r-state)
+                      actual-lines (get-lines-for-verse lst/config current-verse)]
+                  (st/set-moved-tag-pos tag-id x y)
+                  (when (get (:tag-positions @st/r-state) curr-id)
+                    (st/remove-tag-position curr-id)
+                    (st/shift-tag-positions tag-height tag-distance actual-lines)
+                    (let [actual-tag-positions (select-keys (:tag-positions @st/r-state) actual-lines)]
+                      (add-to-movable! (get-first-tag actual-tag-positions) actual-tag-positions))))))
             (:current-tags @st/r-state))
-      ;;(st/shift-tag-positions tag-height tag-distance)
       (lst/set-current-tag-id nil)
       (when (is-click (get-mouse-positon e) (:swipe-start-position @lst/ui-state))
         (.log js/console "click")))
@@ -115,7 +133,10 @@
   (run! (fn [[tag-id [x y]]]
           (when-not (get (get-actual-tag-positions @st/r-state) tag-id)
             (st/set-tag-pos tag-id x y)))
-        tag-initial-positions))
+        tag-initial-positions)
+  (let [firstid (get-first-tag tag-initial-positions)]
+    (when-not (get (:moved-tag-positions @st/r-state) firstid)
+      (add-to-movable! firstid (:tag-positions @st/r-state)))))
 
 (defn all-positions [line-ids tag-ids]
   (let [{:keys [lines line-height line-distance tag-height tag-distance left-margin-poem left-margin-tags next-arrow-x]} lst/config
@@ -139,10 +160,6 @@
      [left-margin-poem arrow-y]
      :right-arrow-position
      [next-arrow-x arrow-y]}))
-
-(defn get-lines-for-verse [config [category poem verse]]
-  (map (fn [line-idx] [category poem verse line-idx])
-       (range (get-in (:verse-lengths config) [category poem verse]))))
 
 (defn set-tag-to-blank-for-new-lines [line-ids]
   (let [new-blank-lines (into {} (map (fn[id] [id :blank]) line-ids))]
