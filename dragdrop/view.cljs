@@ -26,25 +26,25 @@
   (rcore/create-class
     {:component-did-mount
      (fn [this]
-       (let [[_ line-id _x _y] (rcore/argv this)]
-         (dd/make-draggable (rdom/dom-node this) line-id)))
+       (let [[_ line-id _x _y movable?] (rcore/argv this)]
+         (when movable?
+           (dd/make-draggable (rdom/dom-node this) line-id))))
      :reagent-render
-     (fn [line-id x y]
+     (fn [line-id x y _movable?]
        (let [{:keys [lines line-height tag-text-color]} lst/config]
          [:text {:x x :y y
                  :style {:cursor :move} :font-size line-height :fill tag-text-color}
           (get-in lines [line-id :tag])]))}))
 
 (defn plot-tags [& _]
-  (fn [current-verse tag-positions]
+  (fn [current-verse tag-positions movable?]
     (pc "plot-tags")
     (let [line-ids (dd/get-lines-for-verse lst/config current-verse)]
       [:<>
        (map (fn [line-id]
               (let [[x y] (get tag-positions line-id)]
                 (when x
-                  ^{:key line-id} [plot-tag line-id x y]
-                  )))
+                  ^{:key line-id} [plot-tag line-id x y movable?])))
             line-ids)])))
 
 (defn plot-tag-rect [& _]
@@ -122,8 +122,8 @@
                   :fill (:fill-color lst/config)}]
           [plot-tag-rects current-verse moved-tag-positions current-tags]
           [plot-poem current-verse current-tags]
-          [plot-tags current-verse non-movable]
-          [plot-tags current-verse moved-tag-positions]]))}))
+          [plot-tags current-verse non-movable false]
+          [plot-tags current-verse moved-tag-positions true]]))}))
 
 (defn categories []
   (let [nof-categories (count (:verse-lengths lst/config))]
