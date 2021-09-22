@@ -165,7 +165,7 @@
    [:button.button {:on-click #(dd/go-to-verse (dd/dec-verse (:current-verse @st/r-state)))} "<"]
    [:button.button {:on-click #(dd/go-to-verse (dd/inc-verse (:current-verse @st/r-state)))} ">"]
    [:button.button {:on-click #(st/set-display-type :content)} "Content"]
-   [:button.button {:on-click #(st/set-display-type :state)} "State"]])
+   #_[:button.button {:on-click #(st/set-display-type :state)} "State"]])
 
 (defn dbg-state []
   [:div

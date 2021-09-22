@@ -7,8 +7,8 @@
    
    schworzbeamund
    im oa spün de hummen auf ;; spün 3
-   vabrumman se zwischn brennessl ;; zwischn 1
-   und sauaompfa  
+   vabrumman se zwischn ;; zwischn 1
+   brennessl und sauaompfa  
    ochtsome wegbegleita: klee, moos ;; moos 2
    und ondres krawialach ;; ondres 5
    i ko scho koa grea mea segn ;; segn 4
@@ -34,7 +34,7 @@
    ohne de viacha z'vastörn ;; viacha 3
    da köhla oba ko ned schlofn ;; schlofn 1
 
-   schattn triabn sei iris ;; traibn 3
+   schattn triabn sei iris ;; triabn 3
    und in seina haut ;; seina 2
    gliaht es feia ;; feia 1
 
