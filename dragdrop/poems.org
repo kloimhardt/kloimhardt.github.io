@@ -7,8 +7,10 @@
    
    schworzbeamund
    im oa spün de hummen auf ;; spün 3
-   vabrumman se zwischn brennessl und sauaompfa ;; zwischn 1 
-   ochtsome wegbegleita: klee, moos und ondres krawialach ;; moos 2
+   vabrumman se zwischn brennessl ;; zwischn 1
+   und sauaompfa  
+   ochtsome wegbegleita: klee, moos ;; moos 2
+   und ondres krawialach ;; ondres 5
    i ko scho koa grea mea segn ;; segn 4
 
 ** Köhler
@@ -16,25 +18,42 @@
    im hoizfaschlog ;; hoizfaschlog 5
    an da traubneichn ;; da 4
    de schief gwochsn ins fensta hängt ;; schief 3
-   die zweige san dem köhla sei wäscheleine ;; zweige 2
+   die zweige san dem köhla sei ;; zweige 2
+   wäscheleine
    
    sunst siagt man kaum ;; kaum 3
-   sei ruf is dahi ;; dahi 5
+   sei ruf is dahi ;; dahi 6
    zündla zischn de bama ;; zischn 2
    hinta seim ruckn ;; ruckn 1
-   obwoi scho long koa rauch mehr aus da köhlerei kummt ;; kummt 4
+   obwoi scho long koa rauch ;; koa 5
+   mehr aus da köhlerei kummt ;; kummt 4
 
-   luftvapesta sogn de umweltschütza
-   de in de maulwurfsgrebn drinhockn
-   natürlich mit volla rücksicht
-   ohne de viacha z'vastörn
-   da köhla oba ko ned schlofn
+   luftvapesta sogn de umweltschütza ;; sogn 4
+   de in de maulwurfsgrebn drinhockn ;;  maulwurfsgrebn 5
+   natürlich mit volla rücksicht ;; volla 2
+   ohne de viacha z'vastörn ;; viacha 3
+   da köhla oba ko ned schlofn ;; schlofn 1
 
-   schattn triabn sei iris
-   und in sein haut
-   gliaht es feia
+   schattn triabn sei iris ;; traibn 3
+   und in seina haut ;; seina 2
+   gliaht es feia ;; feia 1
+
+** Schwammal
+   de schwammal sterbm an leisn tod ;; schwammal 5
+   woandas brennt da woid o ;;brennt 4
+   de vicha sand auf da flucht ;; sand 1
+   da rauch vaschliaßt ohrn und nosn ;; vaschliaßt 2
+   und de lichtungen werdn weit ;; weit 3
    
-* Art
+   da köhla trogt gluat auf de wangerl ;; auf 3
+   und de umwödschütza laufn durch de ;; laufn 2
+   büsch
+   und vasprenkln eana letztes quöwossa ;; letztes 5
+   grillgeruch hengg in da luft ;; luft 4
+   es brotn de vegl mit spitze schrei ;; vegl 1
+   es pfiatn de äst a baba ;; baba 6
+   
+* Kloimhardt
 ** Kein Zaubertrank
   Jedes Kind weiss: ;; Kind 4
   kein bärtiger Mann ;; Mann 1
@@ -54,65 +73,3 @@
   Das stimmt nicht mal in ihrem Fall.
   Chemische Bindungen
   sind ziemlich stabil.
-
-** Zell-null-lose
-  Ich hab Mitleid mit meinem Saugroboter.
-  Er findet seine Aufladezelle nicht mehr,
-  dreht sich kopflos im Kreis.
-
-  Fraglos läuft alles
-  auf jeden Fall
-  ganz rund im Moment
-  bei mir.
-
-  Gottseidank hat meine Hose
-  einen Gummizug.
-
-  Die Jeans wär mir grad zu eng.
-
-* Mosaik
-** Im Stadtpark
-  Wie Youtube 
-  ist er,
-  mit Werbung:
-  Stört plötzlich,
-  bleibt bestimmt.
-
-  bedauernswert
-  aber
-  ein abbuchabonnement
-  bleibt wunsch
-  ist unmöglich
-  
-** Taunusanlage
-  Frankfurt im Spätherbst.
-
-  Er,
-  unrasiert,
-  abgerissen,
-  fragt,
-  entgegenkommend,
-  mein junges Ich:
-
-  - Wo gehts zur Bundesbank?
-
-  Ich weise weiter in seine Richtung.
-
-  Sein Blick fixiert mich,
-  sehnsüchtig,
-  skeptisch, über
-  fünfzigjährig.
-
-  - Bürojob,
-  oder?
-
-  Ich nicke im Anzug
-  und folge dem Wind.
-
-  Er dagegen setzt den Schritt
-  auf der andern Seite fort, um
-  hier letzte D-Mark in Euro zu tauschen.
-  
-* State
-** d
-   duda ho ;; ho 1
