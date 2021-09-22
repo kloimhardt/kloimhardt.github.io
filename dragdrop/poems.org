@@ -61,15 +61,15 @@
   ist weiser ;; ist 2
   als Miraculix.
 
-  Sie hingegen war, ;; war 1
-  soweit auf der Seite sichtbar, ;; soweit 2
+  Sie hingegen war, ;; war 4
+  soweit auf der Seite sichtbar, ;; sichtbar 2
   frisch
-  und glatt rasiert. ;; glatt 3
-  - Ich sage zu dir,
+  und glatt rasiert. ;; glatt 5
+  - Ich sage zu dir, ;; zu 2
   schreibt sie,
-  das atomare Chaos
-  betrifft jede Zelle.
+  das atomare Chaos ;; Chaos 1
+  betrifft jede Zelle. ;; Zelle 3
 
-  Das stimmt nicht mal in ihrem Fall.
-  Chemische Bindungen
-  sind ziemlich stabil.
+  Das stimmt nicht mal in ihrem Fall. ;; stimmt 2
+  Chemische Bindungen ;; Bindungen 1
+  sind ziemlich stabil. ;; ziemlich 3
